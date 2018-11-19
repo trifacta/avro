@@ -20,6 +20,9 @@ cmake_minimum_required (VERSION 2.6)
 
 set (CMAKE_LEGACY_CYGWIN_WIN32 0)
 
+option(AVRO_UNIT_TEST "build unit test" OFF)
+option(AVRO_BUILD_EXECUTABLES "build avrogencpp and precompile executables" OFF)
+
 cmake_policy (SET CMP0042 NEW)
 
 if (NOT DEFINED CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS)
@@ -96,7 +99,7 @@ set (AVRO_SOURCE_FILES
         impl/Resolver.cc impl/Validator.cc
         )
 
-add_library (avrocpp SHARED ${AVRO_SOURCE_FILES})
+add_library (avrocpp ${AVRO_SOURCE_FILES})
 
 set_property (TARGET avrocpp
     APPEND PROPERTY COMPILE_DEFINITIONS AVRO_DYN_LINK)
@@ -114,6 +117,7 @@ set_target_properties (avrocpp_s PROPERTIES
 
 target_link_libraries (avrocpp ${Boost_LIBRARIES} ${SNAPPY_LIBRARIES})
 
+IF(AVRO_BUILD_EXECUTABLES)
 add_executable (precompile test/precompile.cc)
 
 target_link_libraries (precompile avrocpp_s ${Boost_LIBRARIES} ${SNAPPY_LIBRARIES})
@@ -147,6 +151,9 @@ gen (primitivetypes pt)
 add_executable (avrogencpp impl/avrogencpp.cc)
 target_link_libraries (avrogencpp avrocpp_s ${Boost_LIBRARIES} ${SNAPPY_LIBRARIES})
 
+ENDIF(AVRO_BUILD_EXECUTABLES)
+
+IF(AVRO_UNIT_TEST)
 enable_testing()
 
 macro (unittest name)
@@ -174,6 +181,8 @@ add_dependencies (AvrogencppTests bigrecord_hh bigrecord_r_hh bigrecord2_hh
     recursive_hh reuse_hh circulardep_hh tree1_hh tree2_hh crossref_hh
     primitivetypes_hh empty_record_hh)
 
+ENDIF(AVRO_UNIT_TEST)
+
 include (InstallRequiredSystemLibraries)
 
 set (CPACK_PACKAGE_FILE_NAME "avrocpp-${AVRO_VERSION_MAJOR}")
@@ -185,7 +194,9 @@ install (TARGETS avrocpp avrocpp_s
     ARCHIVE DESTINATION lib
     RUNTIME DESTINATION lib)
 
+IF(AVRO_BUILD_EXECUTABLES)
 install (TARGETS avrogencpp RUNTIME DESTINATION bin)
+ENDIF(AVRO_BUILD_EXECUTABLES)
 
 install (DIRECTORY api/ DESTINATION include/avro
     FILES_MATCHING PATTERN *.hh)
