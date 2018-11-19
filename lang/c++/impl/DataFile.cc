@@ -434,13 +434,13 @@ bool DataFileReaderBase::readDataBlock()
         checksum = (b1 << 24) + (b2 << 16) + (b3 << 8) + (b4);
         if (!snappy::Uncompress(reinterpret_cast<const char*>(&compressed_[0]),
                 len - 4, &uncompressed)) {
-            throw Exception(
+            throw CodecError(
                     "Snappy Compression reported an error when decompressing");
         }
         crc.process_bytes(uncompressed.c_str(), uncompressed.size());
         uint32_t c = crc();
         if (checksum != c) {
-            throw Exception(boost::format("Checksum did not match for Snappy compression: Expected: %1%, computed: %2%") % checksum % c);
+            throw CodecError(boost::format("Checksum did not match for Snappy compression: Expected: %1%, computed: %2%") % checksum % c);
         }
         os_.reset(new boost::iostreams::filtering_istream());
         os_->push(
@@ -452,7 +452,7 @@ bool DataFileReaderBase::readDataBlock()
         dataStream_ = in;
 #endif
     } else {
-        throw Exception("Bad codec");
+        throw Exception("Unknown/unsupported codec");
     }
     return true;
 }
