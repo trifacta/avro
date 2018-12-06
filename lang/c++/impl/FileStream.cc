@@ -17,17 +17,21 @@
  */
 
 #include <fstream>
+#include <string>
 #include "Stream.hh"
 #ifndef _WIN32
 #include "unistd.h"
 #include "fcntl.h"
 #include "errno.h"
+#include "DataFile.hh"
 
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
 #else
 #include "Windows.h"
+
+
 
 #ifdef min
 #undef min
@@ -81,8 +85,8 @@ struct FileBufferCopyIn : public BufferCopyIn {
     FileBufferCopyIn(const char* filename) :
         fd_(open(filename, O_RDONLY | O_BINARY)) {
         if (fd_ < 0) {
-            throw Exception(boost::format("Cannot open file: %1%") %
-                ::strerror(errno));
+            avro_error_state.error_state_messages.recordError(
+                str(boost::format("Cannot open file: %1%") % ::strerror(errno)));
         }
     }
 
@@ -342,6 +346,9 @@ auto_ptr<SeekableInputStream> fileSeekableInputStream(const char* filename,
     size_t bufferSize)
 {
     auto_ptr<BufferCopyIn> in(new FileBufferCopyIn(filename));
+    if (avro::avro_error_state.has_errored) {
+        return;
+    }
     return auto_ptr<SeekableInputStream>(
         new BufferCopyInInputStream(in, bufferSize));
 }

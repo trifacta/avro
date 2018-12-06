@@ -22,6 +22,7 @@
 #include "ValidSchema.hh"
 #include "Schema.hh"
 #include "Node.hh"
+#include "DataFile.hh"
 
 using std::string;
 using std::ostringstream;
@@ -36,8 +37,8 @@ typedef std::map<Name, NodePtr> SymbolMap;
 static bool validate(const NodePtr &node, SymbolMap &symbolMap)
 {
     if (! node->isValid()) {
-        throw Exception(format("Schema is invalid, due to bad node of type %1%")
-            % node->type());
+        return avro_error_state.recordError(str(format("Schema is invalid, due to bad node of type %1%")
+            % node->type()));
     }
 
     if (node->hasName()) {
@@ -47,8 +48,8 @@ static bool validate(const NodePtr &node, SymbolMap &symbolMap)
 
         if (node->type() == AVRO_SYMBOLIC) {
             if (! found) {
-                throw Exception(format("Symbolic name \"%1%\" is unknown") %
-                    node->name());
+                return avro_error_state.recordError(str(format("Symbolic name \"%1%\" is unknown") %
+                    node->name()));
             }
 
             shared_ptr<NodeSymbolic> symNode =
@@ -179,7 +180,7 @@ string ValidSchema::compactSchema(const string& schema) {
     }
 
     if (insideQuote) {
-        throw Exception("Schema is not well formed with mismatched quotes");
+        return avro_error_state.recordError("Schema is not well formed with mismatched quotes");
     }
 
     if (newPos < schema.size()) {

@@ -23,6 +23,7 @@
 #include "Schema.hh"
 #include "ValidSchema.hh"
 #include "Stream.hh"
+#include "DataFile.hh"
 
 #include "json/JsonDom.hh"
 
@@ -98,7 +99,7 @@ static NodePtr makeNode(const string &t, SymbolTable &st, const string &ns)
     if (it != st.end()) {
         return NodePtr(new NodeSymbolic(asSingleAttribute(n), it->second));
     }
-    throw Exception(boost::format("Unknown type: %1%") % n.fullname());
+    return avro_error_state.recordError(str(boost::format("Unknown type: %1%") % n.fullname()));
 }
 
 /** Returns "true" if the field is in the container */
@@ -113,8 +114,8 @@ const json::Object::const_iterator findField(const Entity &e,
 {
     Object::const_iterator it = m.find(fieldName);
     if (it == m.end()) {
-        throw Exception(boost::format("Missing Json field \"%1%\": %2%") %
-            fieldName % e.toString());
+        return avro_error_state.recordError(str(boost::format("Missing Json field \"%1%\": %2%") %
+            fieldName % e.toString()));
     } else {
         return it;
     }
@@ -123,8 +124,8 @@ const json::Object::const_iterator findField(const Entity &e,
 template <typename T> void ensureType(const Entity &e, const string &name)
 {
     if (e.type() != json::type_traits<T>::type()) {
-        throw Exception(boost::format("Json field \"%1%\" is not a %2%: %3%") %
-            name % json::type_traits<T>::name() % e.toString());
+        return avro_error_state.recordError(str(boost::format("Json field \"%1%\" is not a %2%: %3%") %
+            name % json::type_traits<T>::name() % e.toString()));
     }
 }
 
@@ -176,10 +177,10 @@ struct Field {
 static void assertType(const Entity& e, EntityType et)
 {
     if (e.type() != et) {
-        throw Exception(boost::format("Unexpected type for default value: "
+        return avro_error_state.recordError(str(boost::format("Unexpected type for default value: "
             "Expected %1%, but found %2% in line %3%") %
                 json::typeToString(et) % json::typeToString(e.type()) %
-                e.line());
+                e.line()));
     }
 }
 
@@ -241,8 +242,8 @@ static GenericDatum makeGenericDatum(NodePtr n,
         for (size_t i = 0; i < n->leaves(); ++i) {
             map<string, Entity>::const_iterator it = v.find(n->nameAt(i));
             if (it == v.end()) {
-                throw Exception(boost::format(
-                    "No value found in default for %1%") % n->nameAt(i));
+                return avro_error_state.recordError(str(boost::format(
+                    "No value found in default for %1%") % n->nameAt(i)));
             }
             result.setFieldAt(i,
                 makeGenericDatum(n->leafAt(i), it->second, st));
@@ -286,7 +287,7 @@ static GenericDatum makeGenericDatum(NodePtr n,
         assertType(e, json::etString);
         return GenericDatum(n, GenericFixed(n, toBin(e.stringValue())));
     default:
-        throw Exception(boost::format("Unknown type: %1%") % t);
+        return avro_error_state.recordError(str(boost::format("Unknown type: %1%") % t));
     }
     return GenericDatum();
 }
@@ -340,8 +341,8 @@ static NodePtr makeEnumNode(const Entity& e,
     concepts::MultiAttribute<string> symbols;
     for (Array::const_iterator it = v.begin(); it != v.end(); ++it) {
         if (it->type() != json::etString) {
-            throw Exception(boost::format("Enum symbol not a string: %1%") %
-                it->toString());
+            return avro_error_state.recordError(str(boost::format("Enum symbol not a string: %1%") %
+                it->toString()));
         }
         symbols.add(it->stringValue());
     }
@@ -357,8 +358,8 @@ static NodePtr makeFixedNode(const Entity& e,
 {
     int v = static_cast<int>(getLongField(e, m, "size"));
     if (v <= 0) {
-        throw Exception(boost::format("Size for fixed is not positive: %1%") %
-            e.toString());
+        return avro_error_state.recordError(str(boost::format("Size for fixed is not positive: %1%") %
+            e.toString()));
     }
     NodePtr node =
         NodePtr(new NodeFixed(asSingleAttribute(name), asSingleAttribute(v)));
@@ -403,10 +404,10 @@ static Name getName(const Entity& e, const Object& m, const string& ns)
         Object::const_iterator it = m.find("namespace");
         if (it != m.end()) {
             if (it->second.type() != json::type_traits<string>::type()) {
-                throw Exception(boost::format(
+                return avro_error_state.recordError(str(boost::format(
                     "Json field \"%1%\" is not a %2%: %3%") %
                         "namespace" % json::type_traits<string>::name() %
-                        it->second.toString());
+                        it->second.toString()));
             }
             Name result = Name(name, it->second.stringValue());
             return result;
@@ -452,8 +453,8 @@ static NodePtr makeNode(const Entity& e, const Object& m,
     } else if (type == "map") {
         return makeMapNode(e, m, st, ns);
     }
-    throw Exception(boost::format("Unknown type definition: %1%")
-        % e.toString());
+    return avro_error_state.recordError(str(boost::format("Unknown type definition: %1%")
+        % e.toString()));
 }
 
 static NodePtr makeNode(const Entity& e, const Array& m,
@@ -476,7 +477,7 @@ static NodePtr makeNode(const json::Entity& e, SymbolTable& st, const string& ns
     case json::etArray:
         return makeNode(e, e.arrayValue(), st, ns);
     default:
-        throw Exception(boost::format("Invalid Avro type: %1%") % e.toString());
+        return avro_error_state.recordError(str(boost::format("Invalid Avro type: %1%") % e.toString()));
     }
 }
 
@@ -520,7 +521,7 @@ static ValidSchema compile(std::istream& is)
 AVRO_DECL void compileJsonSchema(std::istream &is, ValidSchema &schema)
 {
     if (!is.good()) {
-        throw Exception("Input stream is not good");
+        return avro_error_state.recordError("Input stream is not good");
     }
 
     schema = compile(is);

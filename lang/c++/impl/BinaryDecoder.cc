@@ -21,6 +21,7 @@
 #include "Decoder.hh"
 #include "Zigzag.hh"
 #include "Exception.hh"
+#include "DataFile.hh"
 
 #include <boost/array.hpp>
 #include <boost/make_shared.hpp>
@@ -84,15 +85,15 @@ bool BinaryDecoder::decodeBool()
     } else if (v == 1) {
         return true;
     }
-    throw Exception("Invalid value for bool");
+    return avro_error_state.recordError("Invalid value for bool");
 }
 
 int32_t BinaryDecoder::decodeInt()
 {
     int64_t val = doDecodeLong();
     if (val < INT32_MIN || val > INT32_MAX) {
-        throw Exception(
-            boost::format("Value out of range for Avro int: %1%") % val);
+        return avro_error_state.recordError(str(
+            boost::format("Value out of range for Avro int: %1%") % val));
     }
     return static_cast<int32_t>(val);
 }
@@ -120,8 +121,8 @@ size_t BinaryDecoder::doDecodeLength()
 {
     ssize_t len = decodeInt();
     if (len < 0) {
-        throw Exception(
-            boost::format("Cannot have negative length: %1%") % len);
+        return avro_error_state.recordError(str(
+            boost::format("Cannot have negative length: %1%") % len));
     }
     return len;
 }
@@ -233,7 +234,7 @@ int64_t BinaryDecoder::doDecodeLong() {
     uint8_t u;
     do {
         if (shift >= 64) {
-            throw Exception("Invalid Avro varint");
+            return avro_error_state.recordError("Invalid Avro varint");
         }
         u = in_.read();
         encoded |= static_cast<uint64_t>(u & 0x7f) << shift;

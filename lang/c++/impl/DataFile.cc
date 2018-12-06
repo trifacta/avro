@@ -97,9 +97,9 @@ DataFileWriterBase::DataFileWriterBase(std::auto_ptr<OutputStream> outputStream,
 
 void DataFileWriterBase::init(const ValidSchema &schema, size_t syncInterval, const Codec &codec) {
     if (syncInterval < minSyncInterval || syncInterval > maxSyncInterval) {
-        throw Exception(boost::format("Invalid sync interval: %1%. "
+        return avro_error_state.recordError(str(boost::format("Invalid sync interval: %1%. "
             "Should be between %2% and %3%") % syncInterval %
-                        minSyncInterval % maxSyncInterval);
+                        minSyncInterval % maxSyncInterval));
     }
     setMetadata(AVRO_CODEC_KEY, AVRO_NULL_CODEC);
 
@@ -112,7 +112,7 @@ void DataFileWriterBase::init(const ValidSchema &schema, size_t syncInterval, co
       setMetadata(AVRO_CODEC_KEY, AVRO_SNAPPY_CODEC);
 #endif
     } else {
-      throw Exception(boost::format("Unknown codec: %1%") % codec);
+      return avro_error_state.recordError(str(boost::format("Unknown codec: %1%") % codec));
     }
     setMetadata(AVRO_SCHEMA_KEY, schema.toJson(false));
 
@@ -331,7 +331,7 @@ bool DataFileReaderBase::hasMore()
     decoder_->init(*stream_);
     avro::decode(*decoder_, s);
     if (s != sync_) {
-        throw Exception("Sync mismatch");
+        return avro_error_state.recordError("Sync mismatch");
     }
     return readDataBlock();
 }
@@ -436,13 +436,12 @@ bool DataFileReaderBase::readDataBlock()
         checksum = (b1 << 24) + (b2 << 16) + (b3 << 8) + (b4);
         if (!snappy::Uncompress(reinterpret_cast<const char*>(&compressed_[0]),
                 len - 4, &uncompressed)) {
-            throw CodecError(
-                    "Snappy Compression reported an error when decompressing");
+            return avro_error_state.recordError("CodecError: Snappy Compression reported an error when decompressing");
         }
         crc.process_bytes(uncompressed.c_str(), uncompressed.size());
         uint32_t c = crc();
         if (checksum != c) {
-            throw CodecError(boost::format("Checksum did not match for Snappy compression: Expected: %1%, computed: %2%") % checksum % c);
+            return avro_error_state.recordError("CodecError: " + str(boost::format("Checksum did not match for Snappy compression: Expected: %1%, computed: %2%") % checksum % c));
         }
         os_.reset(new boost::iostreams::filtering_istream());
         os_->push(
@@ -454,7 +453,7 @@ bool DataFileReaderBase::readDataBlock()
         dataStream_ = in;
 #endif
     } else {
-        throw Exception("Unknown/unsupported codec");
+        return avro_error_state.recordError("Unknown/unsupported codec");
     }
     return true;
 }
@@ -485,13 +484,13 @@ void DataFileReaderBase::readHeader()
     Magic m;
     avro::decode(*decoder_, m);
     if (magic != m) {
-        throw Exception("Invalid data file. Magic does not match: "
+        return avro_error_state.recordError("Invalid data file. Magic does not match: "
             + filename_);
     }
     avro::decode(*decoder_, metadata_);
     Metadata::const_iterator it = metadata_.find(AVRO_SCHEMA_KEY);
     if (it == metadata_.end()) {
-        throw Exception("No schema in metadata");
+        return avro_error_state.recordError("No schema in metadata");
     }
 
     dataSchema_ = makeSchema(it->second);
@@ -510,7 +509,7 @@ void DataFileReaderBase::readHeader()
     } else {
         codec_ = NULL_CODEC;
         if (it != metadata_.end() && toString(it->second) != AVRO_NULL_CODEC) {
-            throw Exception("Unknown codec in data file: " + toString(it->second));
+            return avro_error_state.recordError("Unknown codec in data file: " + toString(it->second));
         }
     }
 
@@ -529,7 +528,7 @@ void DataFileReaderBase::doSeek(int64_t position) {
         ss->seek(position);
         eof_ = false;
     } else {
-        throw Exception("seek not supported on non-SeekableInputStream");
+        return avro_error_state.recordError("seek not supported on non-SeekableInputStream");
     }
 }
 

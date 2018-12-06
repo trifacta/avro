@@ -28,6 +28,7 @@
 
 #include "Node.hh"
 #include "ValidSchema.hh"
+#include "DataFile.hh"
 
 namespace avro {
 /**
@@ -256,7 +257,7 @@ public:
     size_t fieldIndex(const std::string& name) const { 
         size_t index = 0;
         if (!schema()->nameIndex(name, index)) {
-            throw Exception("Invalid field name: " + name);
+            return avro_error_state.recordError("Invalid field name: " + name);
         }
         return index;
     }
@@ -388,7 +389,7 @@ class AVRO_DECL GenericEnum : public GenericContainer {
         if (schema->nameIndex(symbol, result)) {
             return result;
         }
-        throw Exception("No such symbol");
+        return avro_error_state.recordError("No such symbol");
     }
 
 public:
@@ -412,7 +413,7 @@ public:
         if (n < schema()->names()) {
             return schema()->nameAt(n);
         }
-        throw Exception("Not as many symbols");
+        return avro_error_state.recordError("Not as many symbols");
     }
 
     /**
@@ -438,7 +439,7 @@ public:
             value_ = n;
             return;
         }
-        throw Exception("Not as many symbols");
+        return avro_error_state.recordError("Not as many symbols");
     }
 
     /**

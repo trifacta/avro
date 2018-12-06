@@ -17,6 +17,7 @@
  */
 
 #include "Generic.hh"
+#include "DataFile.hh"
 #include <sstream>
 
 namespace avro {
@@ -29,8 +30,8 @@ typedef vector<uint8_t> bytes;
 
 void GenericContainer::assertType(const NodePtr& schema, Type type) {
     if (schema->type() != type) {
-        throw Exception(boost::format("Schema type %1 expected %2") %
-            toString(schema->type()) % toString(type));
+        return avro_error_state.recordError(str(boost::format("Schema type %1 expected %2") %
+            toString(schema->type()) % toString(type)));
     }
 }
 
@@ -144,8 +145,8 @@ void GenericReader::read(GenericDatum& datum, Decoder& d, bool isResolving)
         }
         break;
     default:
-        throw Exception(boost::format("Unknown schema type %1%") %
-            toString(datum.type()));
+        return avro_error_state.recordError(str(boost::format("Unknown schema type %1%") %
+            toString(datum.type())));
     }
 }
 
@@ -247,8 +248,8 @@ void GenericWriter::write(const GenericDatum& datum, Encoder& e)
         }
         break;
     default:
-        throw Exception(boost::format("Unknown schema type %1%") %
-            toString(datum.type()));
+        return avro_error_state.recordError(str(boost::format("Unknown schema type %1%") %
+            toString(datum.type())));
     }
 }
 

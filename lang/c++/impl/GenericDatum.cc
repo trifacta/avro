@@ -18,6 +18,7 @@
 
 #include "GenericDatum.hh"
 #include "NodeImpl.hh"
+#include "DataFile.hh"
 
 using std::string;
 using std::vector;
@@ -85,8 +86,8 @@ void GenericDatum::init(const NodePtr& schema)
         value_ = GenericUnion(sc);
         break;
     default:
-        throw Exception(boost::format("Unknown schema type %1%") %
-            toString(type_));
+        return avro_error_state.recordError(str(boost::format("Unknown schema type %1%") %
+            toString(type_)));
     }
 }
 

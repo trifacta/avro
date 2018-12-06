@@ -18,6 +18,7 @@
 
 #include "Encoder.hh"
 #include "Zigzag.hh"
+#include "DataFile.hh"
 #include <boost/array.hpp>
 #include <boost/make_shared.hpp>
 
@@ -141,7 +142,7 @@ void BinaryEncoder::mapEnd()
 void BinaryEncoder::setItemCount(size_t count)
 {
     if (count == 0) {
-        throw Exception("Count cannot be zero");
+        return avro_error_state.recordError("Count cannot be zero");
     }
     doEncodeLong(count);
 }
