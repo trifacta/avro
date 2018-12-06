@@ -29,6 +29,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <queue>
 
 #include "boost/array.hpp"
 #include "boost/utility.hpp"
@@ -47,6 +48,17 @@ enum Codec {
 #endif
 
 };
+
+struct error_state {
+    std::queue<std::string> error_state_messages;
+    bool has_errored;
+    void recordError(std::string msg) {
+        has_errored = true;
+        error_state_messages.push(msg);
+    }
+} ;
+
+extern thread_local error_state avro_error_state;
 
 /**
  * The sync value.
