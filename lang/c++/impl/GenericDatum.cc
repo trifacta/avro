@@ -86,8 +86,10 @@ void GenericDatum::init(const NodePtr& schema)
         value_ = GenericUnion(sc);
         break;
     default:
-        return avro_error_state.recordError(str(boost::format("Unknown schema type %1%") %
+        avro_error_state.recordError(str(boost::format("Unknown schema type %1%") %
             toString(type_)));
+        // throw Exception(boost::format("Unknown schema type %1%") %
+        //     toString(type_));
     }
 }
 

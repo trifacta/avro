@@ -24,9 +24,9 @@
 #define YYLEX_PARAM ctx
 #define YYPARSE_PARAM ctx
 
-void yyerror(const char *str)
+void yyerror(const char *err_str)
 {
-    throw avro::Exception(boost::format("Parser error: %1%") % str);
+    return avro::avro_error_state.recordError(str(boost::format("Parser error: %1%") % err_str));
 }
  
 extern void *lexer; 

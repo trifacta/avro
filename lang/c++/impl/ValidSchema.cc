@@ -37,8 +37,10 @@ typedef std::map<Name, NodePtr> SymbolMap;
 static bool validate(const NodePtr &node, SymbolMap &symbolMap)
 {
     if (! node->isValid()) {
-        return avro_error_state.recordError(str(format("Schema is invalid, due to bad node of type %1%")
+        avro_error_state.recordError(str(format("Schema is invalid, due to bad node of type %1%")
             % node->type()));
+        throw Exception(format("Schema is invalid, due to bad node of type %1%")
+            % node->type());
     }
 
     if (node->hasName()) {
@@ -48,8 +50,10 @@ static bool validate(const NodePtr &node, SymbolMap &symbolMap)
 
         if (node->type() == AVRO_SYMBOLIC) {
             if (! found) {
-                return avro_error_state.recordError(str(format("Symbolic name \"%1%\" is unknown") %
+                avro_error_state.recordError(str(format("Symbolic name \"%1%\" is unknown") %
                     node->name()));
+                throw Exception(format("Symbolic name \"%1%\" is unknown") %
+                    node->name());
             }
 
             shared_ptr<NodeSymbolic> symNode =
@@ -70,8 +74,11 @@ static bool validate(const NodePtr &node, SymbolMap &symbolMap)
     size_t leaves = node->leaves();
     for (size_t i = 0; i < leaves; ++i) {
         const NodePtr &leaf(node->leafAt(i));
-
-        if (! validate(leaf, symbolMap)) {
+        bool name_not_in_map = validate(leaf, symbolMap);
+        if (avro::avro_error_state.has_errored) {
+            return false;
+        }
+        if (! name_not_in_map) {
 
             // if validate returns false it means a node with this name already
             // existed in the map, instead of keeping this node twice in the
@@ -180,7 +187,8 @@ string ValidSchema::compactSchema(const string& schema) {
     }
 
     if (insideQuote) {
-        return avro_error_state.recordError("Schema is not well formed with mismatched quotes");
+        avro_error_state.recordError("Schema is not well formed with mismatched quotes");
+        throw Exception("Schema is not well formed with mismatched quotes");
     }
 
     if (newPos < schema.size()) {

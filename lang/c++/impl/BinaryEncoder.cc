@@ -142,7 +142,8 @@ void BinaryEncoder::mapEnd()
 void BinaryEncoder::setItemCount(size_t count)
 {
     if (count == 0) {
-        return avro_error_state.recordError("Count cannot be zero");
+        avro_error_state.recordError("Count cannot be zero");
+        throw Exception("Count cannot be zero");
     }
     doEncodeLong(count);
 }

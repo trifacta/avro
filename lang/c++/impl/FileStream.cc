@@ -85,8 +85,9 @@ struct FileBufferCopyIn : public BufferCopyIn {
     FileBufferCopyIn(const char* filename) :
         fd_(open(filename, O_RDONLY | O_BINARY)) {
         if (fd_ < 0) {
-            avro_error_state.error_state_messages.recordError(
+            avro_error_state.recordError(
                 str(boost::format("Cannot open file: %1%") % ::strerror(errno)));
+            throw Exception(boost::format("Cannot open file: %1%") % ::strerror(errno));
         }
     }
 
@@ -346,9 +347,9 @@ auto_ptr<SeekableInputStream> fileSeekableInputStream(const char* filename,
     size_t bufferSize)
 {
     auto_ptr<BufferCopyIn> in(new FileBufferCopyIn(filename));
-    if (avro::avro_error_state.has_errored) {
-        return;
-    }
+    // if (avro::avro_error_state.has_errored) {
+    //     return;
+    // }
     return auto_ptr<SeekableInputStream>(
         new BufferCopyInInputStream(in, bufferSize));
 }

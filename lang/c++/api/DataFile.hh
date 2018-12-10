@@ -58,7 +58,7 @@ struct error_state {
     }
 } ;
 
-extern thread_local error_state avro_error_state;
+extern error_state avro_error_state;
 
 /**
  * The sync value.

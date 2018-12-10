@@ -30,8 +30,10 @@ typedef vector<uint8_t> bytes;
 
 void GenericContainer::assertType(const NodePtr& schema, Type type) {
     if (schema->type() != type) {
-        return avro_error_state.recordError(str(boost::format("Schema type %1 expected %2") %
+        avro_error_state.recordError(str(boost::format("Schema type %1 expected %2") %
             toString(schema->type()) % toString(type)));
+        throw Exception(boost::format("Schema type %1 expected %2") %
+            toString(schema->type()) % toString(type));
     }
 }
 
@@ -145,8 +147,10 @@ void GenericReader::read(GenericDatum& datum, Decoder& d, bool isResolving)
         }
         break;
     default:
-        return avro_error_state.recordError(str(boost::format("Unknown schema type %1%") %
+        avro_error_state.recordError(str(boost::format("Unknown schema type %1%") %
             toString(datum.type())));
+        throw Exception(boost::format("Unknown schema type %1%") %
+            toString(datum.type()));
     }
 }
 
@@ -248,8 +252,10 @@ void GenericWriter::write(const GenericDatum& datum, Encoder& e)
         }
         break;
     default:
-        return avro_error_state.recordError(str(boost::format("Unknown schema type %1%") %
+        avro_error_state.recordError(str(boost::format("Unknown schema type %1%") %
             toString(datum.type())));
+        throw Exception(boost::format("Unknown schema type %1%") %
+            toString(datum.type()));
     }
 }
 
