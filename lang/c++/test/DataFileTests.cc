@@ -439,6 +439,10 @@ public:
                 std::max(0, end - boost::random::uniform_int_distribution<>(
                                       0, 2 * length / splits)(random));
             df.sync(start);  // count entries in split
+            if (avro::avro_error_state.has_errored) {
+                // error out
+                BOOST_CHECK_EQUAL(true, false);
+            }
             while (!df.pastSync(end)) {
                 ComplexInteger ci;
                 df.read(ci);

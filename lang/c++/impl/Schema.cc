@@ -18,7 +18,8 @@
 
 
 #include "Schema.hh"
-#include "DataFile.hh"
+// #include "DataFile.hh"
+#include "ErrorState.hh"
 
 namespace avro {
 

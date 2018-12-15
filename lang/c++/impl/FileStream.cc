@@ -23,7 +23,8 @@
 #include "unistd.h"
 #include "fcntl.h"
 #include "errno.h"
-#include "DataFile.hh"
+// #include "DataFile.hh"
+#include "ErrorState.hh"
 
 #ifndef O_BINARY
 #define O_BINARY 0

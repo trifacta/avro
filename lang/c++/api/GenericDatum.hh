@@ -28,7 +28,8 @@
 
 #include "Node.hh"
 #include "ValidSchema.hh"
-#include "DataFile.hh"
+// #include "DataFile.hh"
+#include "ErrorState.hh"
 
 namespace avro {
 /**
@@ -148,6 +149,10 @@ public:
     GenericDatum(const NodePtr& schema, const T& v) :
         type_(schema->type()) {
         init(schema);
+        if (avro_error_state.has_errored) {
+            // just return?
+            return;
+        }
         *boost::any_cast<T>(&value_) = v;
     }
 
@@ -172,6 +177,9 @@ protected:
      */
     GenericContainer(Type type, const NodePtr& s) : schema_(s) {
         assertType(s, type);
+        if (avro_error_state.has_errored) {
+            // do something
+        }
     }
 
 public:
@@ -196,6 +204,10 @@ public:
      */
     GenericUnion(const NodePtr& schema) :
         GenericContainer(AVRO_UNION, schema), curBranch_(schema->leaves()) {
+        if (avro_error_state.has_errored) {
+            // just return
+            return;
+        }
         selectBranch(0);
     }
 
@@ -326,6 +338,9 @@ public:
      * which should be of Avro type array.
      */
     GenericArray(const NodePtr& schema) : GenericContainer(AVRO_ARRAY, schema) {
+        if (avro_error_state.has_errored) {
+            // do something
+        }
     }
 
     /**
@@ -360,6 +375,9 @@ public:
      * which should be of Avro type map.
      */
     GenericMap(const NodePtr& schema) : GenericContainer(AVRO_MAP, schema) {
+        if (avro_error_state.has_errored) {
+            // do something
+        }
     }
 
     /**
@@ -401,10 +419,16 @@ public:
      */
     GenericEnum(const NodePtr& schema) :
         GenericContainer(AVRO_ENUM, schema), value_(0) {
+            if (avro_error_state.has_errored) {
+                // do something
+            }
     }
 
     GenericEnum(const NodePtr& schema, const std::string& symbol) :
         GenericContainer(AVRO_ENUM, schema), value_(index(schema, symbol)) {
+            if (avro_error_state.has_errored) {
+                // do something
+            }
     }
 
     /**
@@ -472,11 +496,19 @@ public:
      * which should be of Avro type fixed.
      */
     GenericFixed(const NodePtr& schema) : GenericContainer(AVRO_FIXED, schema) {
+        if (avro_error_state.has_errored) {
+            // just return
+            return;
+        }
         value_.resize(schema->fixedSize());
     }
 
     GenericFixed(const NodePtr& schema, const std::vector<uint8_t>& v) :
-        GenericContainer(AVRO_FIXED, schema), value_(v) { }
+        GenericContainer(AVRO_FIXED, schema), value_(v) {
+            if (avro_error_state.has_errored) {
+                // do something
+            }
+        }
 
     /**
      * Returns the contents of this fixed.

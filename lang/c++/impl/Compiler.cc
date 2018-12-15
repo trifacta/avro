@@ -23,7 +23,8 @@
 #include "Schema.hh"
 #include "ValidSchema.hh"
 #include "Stream.hh"
-#include "DataFile.hh"
+// #include "DataFile.hh"
+#include "ErrorState.hh"
 
 #include "json/JsonDom.hh"
 
@@ -411,6 +412,10 @@ static NodePtr makeRecordNode(const Entity& e, const Name& name,
 
     for (Array::const_iterator it = v.begin(); it != v.end(); ++it) {
         Field f = makeField(*it, st, ns);
+        if (avro::avro_error_state.has_errored) {
+            // return a dummy
+            return NodePtr();
+        }
         fieldNames.add(f.name);
         fieldValues.add(f.schema);
         defaultValues.push_back(f.defaultValue);
@@ -554,6 +559,10 @@ static NodePtr makeNode(const Entity& e, const Object& m,
                 string doc = getDocField(e, m);
 
                 NodePtr r = makeRecordNode(e, nm, &doc, m, st, nm.ns());
+                if (avro::avro_error_state.has_errored) {
+                    // return a dummy
+                    return NodePtr();
+                }
                 (boost::dynamic_pointer_cast<NodeRecord>(r))->swap(
                     *boost::dynamic_pointer_cast<NodeRecord>(result));
             } else {  // No doc

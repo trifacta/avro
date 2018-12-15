@@ -25,6 +25,7 @@
 #include "ValidSchema.hh"
 #include "Specific.hh"
 #include "Stream.hh"
+#include "ErrorState.hh"
 
 #include <map>
 #include <string>
@@ -48,17 +49,6 @@ enum Codec {
 #endif
 
 };
-
-struct error_state {
-    std::queue<std::string> error_state_messages;
-    bool has_errored;
-    void recordError(std::string msg) {
-        has_errored = true;
-        error_state_messages.push(msg);
-    }
-} ;
-
-extern error_state avro_error_state;
 
 /**
  * The sync value.
@@ -170,6 +160,10 @@ public:
     void write(const T& datum) {
         base_->syncIfNeeded();
         avro::encode(base_->encoder(), datum);
+        if (avro::avro_error_state.has_errored) {
+            // just return
+            return;
+        }
         base_->incr();
     }
 
@@ -313,11 +307,17 @@ public:
      */
     DataFileReader(const char* filename, const ValidSchema& readerSchema) :
         base_(new DataFileReaderBase(filename)) {
+        if (avro_error_state.has_errored) {
+            // do something
+        }
         base_->init(readerSchema);
     }
 
     DataFileReader(std::auto_ptr<InputStream> inputStream, const ValidSchema& readerSchema) :
         base_(new DataFileReaderBase(inputStream)) {
+        if (avro_error_state.has_errored) {
+            // do something
+        }
         base_->init(readerSchema);
     }
 
@@ -368,7 +368,12 @@ public:
      * false if there are no more entries in the file.
      */
     bool read(T& datum) {
-        if (base_->hasMore()) {
+        bool file_has_more = base_->hasMore();
+        if (avro::avro_error_state.has_errored) {
+            // return a dummy
+            return false;
+        }
+        if (file_has_more) {
             base_->decr();
             avro::decode(base_->decoder(), datum);
             return true;

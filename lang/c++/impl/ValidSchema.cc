@@ -22,7 +22,8 @@
 #include "ValidSchema.hh"
 #include "Schema.hh"
 #include "Node.hh"
-#include "DataFile.hh"
+// #include "DataFile.hh"
+#include "ErrorState.hh"
 
 using std::string;
 using std::ostringstream;

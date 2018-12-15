@@ -31,6 +31,7 @@
 #include "Config.hh"
 #include "Encoder.hh"
 #include "Decoder.hh"
+#include "ErrorState.hh"
 
 /**
  * A bunch of templates and specializations for encoding and decoding
@@ -233,6 +234,10 @@ template <typename T> struct codec_traits<std::vector<T> > {
                 it != b.end(); ++it) {
                 e.startItem();
                 avro::encode(e, *it);
+                if (avro::avro_error_state.has_errored) {
+                    // just return
+                    return;
+                }
             }
         }
         e.arrayEnd();
@@ -247,6 +252,10 @@ template <typename T> struct codec_traits<std::vector<T> > {
             for (size_t i = 0; i < n; ++i) {
                 T t;
                 avro::decode(d, t);
+                if (avro::avro_error_state.has_errored) {
+                    // just return
+                    return;
+                }
                 s.push_back(t);
             }
         }
@@ -281,7 +290,15 @@ template <typename T> struct codec_traits<std::map<std::string, T> > {
                 it != b.end(); ++it) {
                 e.startItem();
                 avro::encode(e, it->first);
+                if (avro::avro_error_state.has_errored) {
+                    // just return
+                    return;
+                }
                 avro::encode(e, it->second);
+                if (avro::avro_error_state.has_errored) {
+                    // just return
+                    return;
+                }
             }
         }
         e.mapEnd();
@@ -296,8 +313,16 @@ template <typename T> struct codec_traits<std::map<std::string, T> > {
             for (size_t i = 0; i < n; ++i) {
                 std::string k;
                 avro::decode(d, k);
+                if (avro::avro_error_state.has_errored) {
+                    // just return
+                    return;
+                }
                 T t;
                 avro::decode(d, t);
+                if (avro::avro_error_state.has_errored) {
+                    // just return
+                    return;
+                }
                 s[k] = t;
             }
         }

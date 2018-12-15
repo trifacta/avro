@@ -27,6 +27,7 @@
 
 #include "Config.hh"
 #include "Exception.hh"
+#include "ErrorState.hh"
 
 namespace avro {
 
@@ -253,6 +254,10 @@ struct StreamReader {
     uint8_t read() {
         if (next_ == end_) {
             more();
+            if (avro::avro_error_state.has_errored) {
+                // return a dummy
+                return (uint8_t) 0;
+            }
         }
         return *next_++;
     }
@@ -265,6 +270,10 @@ struct StreamReader {
         while (n > 0) {
             if (next_ == end_) {
                 more();
+                if (avro::avro_error_state.has_errored) {
+                    // just return
+                    return;
+                }
             }
             size_t q = end_ - next_;
             if (q > n) {
@@ -313,7 +322,8 @@ struct StreamReader {
      */
     void more() {
         if (! fill()) {
-            throw Exception("EOF reached");
+            avro::avro_error_state.recordError("EOF reached");
+            // throw Exception("EOF reached");
         }
     }
 
@@ -372,6 +382,10 @@ struct StreamWriter {
     void write(uint8_t c) {
         if (next_ == end_) {
             more();
+            if (avro::avro_error_state.has_errored) {
+                // just return
+                return;
+            }
         }
         *next_++ = c;
     }
@@ -383,6 +397,10 @@ struct StreamWriter {
         while (n > 0) {
             if (next_ == end_) {
                 more();
+                if (avro::avro_error_state.has_errored) {
+                    // just return
+                    return;
+                }
             }
             size_t q = end_ - next_;
             if (q > n) {
@@ -418,7 +436,8 @@ struct StreamWriter {
                 return;
             }
         }
-        throw Exception("EOF reached");
+        avro::avro_error_state.recordError("EOF reached");
+        // throw Exception("EOF reached");
     }
 
 };

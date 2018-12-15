@@ -38,7 +38,8 @@
 #include "NodeImpl.hh"
 #include "Generic.hh"
 #include "Stream.hh"
-#include "DataFile.hh"
+// #include "DataFile.hh"
+#include "ErrorState.hh"
 
 namespace avro {
 
