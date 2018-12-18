@@ -78,6 +78,10 @@ void JsonParser::expectToken(Token tk)
 JsonParser::Token JsonParser::doAdvance()
 {
     char ch = next();
+    if (avro::avro_error_state.has_errored) {
+        // just return[ a dummy object]
+        return tkArrayEnd;
+    }
     if (ch == ']') {
         if (curState == stArray0 || curState == stArrayN) {
             curState = stateStack.top();

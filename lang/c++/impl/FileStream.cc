@@ -58,7 +58,8 @@ struct FileBufferCopyIn : public BufferCopyIn {
     FileBufferCopyIn(const char* filename) :
         h_(::CreateFile(filename, GENERIC_READ, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL)) {
         if (h_ == INVALID_HANDLE_VALUE) {
-            throw Exception(boost::format("Cannot open file: %1%") % ::GetLastError());
+            avro::avro_error_state.recordError(str(boost::format("Cannot open file: %1%") % ::GetLastError()));
+            // throw Exception(boost::format("Cannot open file: %1%") % ::GetLastError());
         }
     }
 
@@ -68,14 +69,16 @@ struct FileBufferCopyIn : public BufferCopyIn {
 
     void seek(ssize_t len) {
         if (::SetFilePointer(h_, len, NULL, FILE_CURRENT) != INVALID_SET_FILE_POINTER) {
-            throw Exception(boost::format("Cannot skip file: %1%") % ::GetLastError());
+            avro::avro_error_state.recordError(str(boost::format("Cannot skip file: %1%") % ::GetLastError()));
+            // throw Exception(boost::format("Cannot skip file: %1%") % ::GetLastError());
         }
     }
 
     bool read(uint8_t* b, size_t toRead, size_t& actual) {
         DWORD dw = 0;
         if (! ::ReadFile(h_, b, toRead, &dw, NULL)) {
-            throw Exception(boost::format("Cannot read file: %1%") % ::GetLastError());
+            avro::avro_error_state.recordError(str(boost::format("Cannot read file: %1%") % ::GetLastError()));
+            // throw Exception(boost::format("Cannot read file: %1%") % ::GetLastError());
         }
         actual = static_cast<size_t>(dw);
         return actual != 0;
@@ -86,8 +89,7 @@ struct FileBufferCopyIn : public BufferCopyIn {
     FileBufferCopyIn(const char* filename) :
         fd_(open(filename, O_RDONLY | O_BINARY)) {
         if (fd_ < 0) {
-            avro_error_state.recordError(
-                str(boost::format("Cannot open file: %1%") % ::strerror(errno)));
+            avro_error_state.recordError(str(boost::format("Cannot open file: %1%") % ::strerror(errno)));
             throw Exception(boost::format("Cannot open file: %1%") % ::strerror(errno));
         }
     }
@@ -99,8 +101,9 @@ struct FileBufferCopyIn : public BufferCopyIn {
     void seek(ssize_t len) {
         off_t r = ::lseek(fd_, len, SEEK_CUR);
         if (r == static_cast<off_t>(-1)) {
-            throw Exception(boost::format("Cannot skip file: %1%") %
-                strerror(errno));
+            avro::avro_error_state.recordError(str(boost::format("Cannot skip file: %1%") % strerror(errno)));
+            // throw Exception(boost::format("Cannot skip file: %1%") % strerror(errno));
+                
         }
     }
 
@@ -124,7 +127,8 @@ struct IStreamBufferCopyIn : public BufferCopyIn {
 
     void seek(ssize_t len) {
         if (! is_.seekg(len, std::ios_base::cur)) {
-            throw Exception("Cannot skip stream");
+            avro::avro_error_state.recordError("Cannot skip stream");
+            // throw Exception("Cannot skip stream");
         }
     }
 
@@ -228,7 +232,8 @@ struct FileBufferCopyOut : public BufferCopyOut {
     FileBufferCopyOut(const char* filename) :
         h_(::CreateFile(filename, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL)) {
         if (h_ == INVALID_HANDLE_VALUE) {
-            throw Exception(boost::format("Cannot open file: %1%") % ::GetLastError());
+            avro::avro_error_state.recordError(str(boost::format("Cannot open file: %1%") % ::GetLastError()));
+            // throw Exception(boost::format("Cannot open file: %1%") % ::GetLastError());
         }
     }
 
@@ -240,7 +245,8 @@ struct FileBufferCopyOut : public BufferCopyOut {
         while (len > 0) {
             DWORD dw = 0;
             if (! ::WriteFile(h_, b, len, &dw, NULL)) {
-                throw Exception(boost::format("Cannot read file: %1%") % ::GetLastError());
+                avro::avro_error_state.recordError(str(boost::format("Cannot read file: %1%") % ::GetLastError()));
+                // throw Exception(boost::format("Cannot read file: %1%") % ::GetLastError());
             }
             b += dw;
             len -= dw;
@@ -251,10 +257,10 @@ struct FileBufferCopyOut : public BufferCopyOut {
 
     FileBufferCopyOut(const char* filename) :
         fd_(::open(filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0644)) {
-
         if (fd_ < 0) {
-            throw Exception(boost::format("Cannot open file: %1%") %
-                ::strerror(errno));
+            avro::avro_error_state.recordError(str(boost::format("Cannot open file: %1%") % ::strerror(errno)));
+            // throw Exception(boost::format("Cannot open file: %1%") % ::strerror(errno));
+                
         }
     }
 
@@ -264,8 +270,9 @@ struct FileBufferCopyOut : public BufferCopyOut {
 
     void write(const uint8_t* b, size_t len) {
         if (::write(fd_, b, len) < 0) {
-            throw Exception(boost::format("Cannot write file: %1%") %
-                ::strerror(errno));
+            avro::avro_error_state.recordError(str(boost::format("Cannot write file: %1%") % ::strerror(errno)));
+            // throw Exception(boost::format("Cannot write file: %1%") % ::strerror(errno));
+                
         }
     }
 #endif

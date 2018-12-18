@@ -47,7 +47,11 @@ const char* typeToString(EntityType t)
 
 Entity readEntity(JsonParser& p)
 {
-    switch (p.peek()) {
+    JsonParser::Token peek_return = p.peek();
+    if (avro::avro_error_state.has_errored) {
+        return Entity();
+    }
+    switch (peek_return) {
     case JsonParser::tkNull:
         p.advance();
         return Entity(p.line());
@@ -69,7 +73,12 @@ Entity readEntity(JsonParser& p)
             p.advance();
             boost::shared_ptr<Array> v = boost::make_shared<Array>();
             while (p.peek() != JsonParser::tkArrayEnd) {
-                v->push_back(readEntity(p));
+                Entity to_push = readEntity(p);
+                if (avro::avro_error_state.has_errored) {
+                    // return a dummy value
+                    return Entity();
+                }
+                v->push_back(to_push);
             }
             p.advance();
             return Entity(v, l);
@@ -83,6 +92,10 @@ Entity readEntity(JsonParser& p)
                 p.advance();
                 std::string k = p.stringValue();
                 Entity n = readEntity(p);
+                if (avro::avro_error_state.has_errored) {
+                    // return a dummy value
+                    return Entity();
+                }
                 v->insert(std::make_pair(k, n));
             }
             p.advance();

@@ -625,6 +625,9 @@ static NodePtr makeNode(const json::Entity& e, SymbolTable& st, const string& ns
 AVRO_DECL ValidSchema compileJsonSchemaFromStream(InputStream& is)
 {
     json::Entity e = json::loadEntity(is);
+    if (avro::avro_error_state.has_errored) {
+        return ValidSchema();
+    }
     SymbolTable st;
     NodePtr n = makeNode(e, st, "");
     if (avro::avro_error_state.has_errored) {

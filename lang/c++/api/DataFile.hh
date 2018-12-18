@@ -30,7 +30,6 @@
 #include <map>
 #include <string>
 #include <vector>
-#include <queue>
 
 #include "boost/array.hpp"
 #include "boost/utility.hpp"
