@@ -41,18 +41,6 @@ class AVRO_DECL Exception : public virtual std::runtime_error
     { }  
 };
 
-class AVRO_DECL CodecError : public virtual std::runtime_error
-{
-  public:
-    CodecError(const std::string &msg) :
-        std::runtime_error(msg)
-    { }
-
-    CodecError(const boost::format &msg) :
-        std::runtime_error(boost::str(msg))
-    { }
-};
-
 } // namespace avro
 
 #endif
