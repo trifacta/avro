@@ -28,17 +28,11 @@ GenericDatum::GenericDatum(const ValidSchema& schema) :
     type_(schema.root()->type())
 {
     init(schema.root());
-    if (avro_error_state.has_errored) {
-        // do something
-    }
 }
 
 GenericDatum::GenericDatum(const NodePtr& schema) : type_(schema->type())
 {
     init(schema);
-    if (avro_error_state.has_errored) {
-        // do something
-    }
 }
 
 void GenericDatum::init(const NodePtr& schema)
@@ -89,29 +83,24 @@ void GenericDatum::init(const NodePtr& schema)
         break;
     case AVRO_UNION:
         value_ = GenericUnion(sc);
-        if (avro_error_state.has_errored) {
-            // do something
-        }
         break;
     default:
         return avro_error_state.recordError(str(boost::format("Unknown schema type %1%") %
             toString(type_)));
-        // throw Exception(boost::format("Unknown schema type %1%") %
-        //     toString(type_));
     }
 }
 
 GenericRecord::GenericRecord(const NodePtr& schema) :
     GenericContainer(AVRO_RECORD, schema) {
     if (avro_error_state.has_errored) {
-        // just return?
+        // just return
         return;
     }
     fields_.resize(schema->leaves());
     for (size_t i = 0; i < schema->leaves(); ++i) {
         fields_[i] = GenericDatum(schema->leafAt(i));
         if (avro_error_state.has_errored) {
-            // just return?
+            // just return
             return;
         }
     }

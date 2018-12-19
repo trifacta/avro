@@ -17,7 +17,6 @@
  */
 
 #include "Generic.hh"
-// #include "DataFile.hh"
 #include "ErrorState.hh"
 #include <sstream>
 
@@ -33,8 +32,6 @@ void GenericContainer::assertType(const NodePtr& schema, Type type) {
     if (schema->type() != type) {
         return avro_error_state.recordError(str(boost::format("Schema type %1 expected %2") %
             toString(schema->type()) % toString(type)));
-        // throw Exception(boost::format("Schema type %1 expected %2") %
-        //     toString(schema->type()) % toString(type));
     }
 }
 
@@ -69,61 +66,29 @@ void GenericReader::read(GenericDatum& datum, Decoder& d, bool isResolving)
         break;
     case AVRO_BOOL:
         datum.value<bool>() = d.decodeBool();
-        if (avro::avro_error_state.has_errored) {
-            // just return
-            return;
-        }
         break;
     case AVRO_INT:
         datum.value<int32_t>() = d.decodeInt();
-        if (avro::avro_error_state.has_errored) {
-            // just return
-            return;
-        }
         break;
     case AVRO_LONG:
         datum.value<int64_t>() = d.decodeLong();
-        if (avro::avro_error_state.has_errored) {
-            // just return
-            return;
-        }
         break;
     case AVRO_FLOAT:
         datum.value<float>() = d.decodeFloat();
-        if (avro::avro_error_state.has_errored) {
-            // just return
-            return;
-        }
         break;
     case AVRO_DOUBLE:
         datum.value<double>() = d.decodeDouble();
-        if (avro::avro_error_state.has_errored) {
-            // just return
-            return;
-        }
         break;
     case AVRO_STRING:
         d.decodeString(datum.value<string>());
-        if (avro::avro_error_state.has_errored) {
-            // just return
-            return;
-        }
         break;
     case AVRO_BYTES:
         d.decodeBytes(datum.value<bytes>());
-        if (avro::avro_error_state.has_errored) {
-            // just return
-            return;
-        }
         break;
     case AVRO_FIXED:
         {
             GenericFixed& f = datum.value<GenericFixed>();
             d.decodeFixed(f.schema()->fixedSize(), f.value());
-            if (avro::avro_error_state.has_errored) {
-                // just return
-                return;
-            }
         }
         break;
     case AVRO_RECORD:
@@ -203,8 +168,6 @@ void GenericReader::read(GenericDatum& datum, Decoder& d, bool isResolving)
     default:
         return avro_error_state.recordError(str(boost::format("Unknown schema type %1%") %
             toString(datum.type())));
-        // throw Exception(boost::format("Unknown schema type %1%") %
-        //     toString(datum.type()));
     }
 }
 
@@ -217,9 +180,6 @@ void GenericReader::read(Decoder& d, GenericDatum& g, const ValidSchema& s)
 void GenericReader::read(Decoder& d, GenericDatum& g)
 {
     read(g, d, dynamic_cast<ResolvingDecoder*>(&d) != 0);
-    if (avro::avro_error_state.has_errored) {
-        // do something
-    }
 }
 
 GenericWriter::GenericWriter(const ValidSchema& s, const EncoderPtr& encoder) :
@@ -236,64 +196,34 @@ void GenericWriter::write(const GenericDatum& datum, Encoder& e)
 {
     if (datum.isUnion()) {
         e.encodeUnionIndex(datum.unionBranch());
-        if (avro_error_state.has_errored) {
-            // do something
-        }
     }
     switch (datum.type()) {
     case AVRO_NULL:
         e.encodeNull();
-        if (avro_error_state.has_errored) {
-            // do something
-        }
         break;
     case AVRO_BOOL:
         e.encodeBool(datum.value<bool>());
-        if (avro_error_state.has_errored) {
-            // do something
-        }
         break;
     case AVRO_INT:
         e.encodeInt(datum.value<int32_t>());
-        if (avro_error_state.has_errored) {
-            // do something
-        }
         break;
     case AVRO_LONG:
         e.encodeLong(datum.value<int64_t>());
-        if (avro_error_state.has_errored) {
-            // do something
-        }
         break;
     case AVRO_FLOAT:
         e.encodeFloat(datum.value<float>());
-        if (avro_error_state.has_errored) {
-            // do something
-        }
         break;
     case AVRO_DOUBLE:
         e.encodeDouble(datum.value<double>());
-        if (avro_error_state.has_errored) {
-            // do something
-        }
         break;
     case AVRO_STRING:
         e.encodeString(datum.value<string>());
-        if (avro_error_state.has_errored) {
-            // do something
-        }
         break;
     case AVRO_BYTES:
         e.encodeBytes(datum.value<bytes>());
-        if (avro_error_state.has_errored) {
-            // do something
-        }
         break;
     case AVRO_FIXED:
         e.encodeFixed(datum.value<GenericFixed>().value());
-        if (avro_error_state.has_errored) {
-            // do something
-        }
         break;
     case AVRO_RECORD:
         {
@@ -310,9 +240,6 @@ void GenericWriter::write(const GenericDatum& datum, Encoder& e)
         break;
     case AVRO_ENUM:
         e.encodeEnum(datum.value<GenericEnum>().value());
-        if (avro_error_state.has_errored) {
-            // do something
-        }
         break;
     case AVRO_ARRAY:
         {
@@ -356,8 +283,6 @@ void GenericWriter::write(const GenericDatum& datum, Encoder& e)
     default:
         return avro_error_state.recordError(str(boost::format("Unknown schema type %1%") %
             toString(datum.type())));
-        // throw Exception(boost::format("Unknown schema type %1%") %
-        //     toString(datum.type()));
     }
 }
 

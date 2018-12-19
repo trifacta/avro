@@ -21,7 +21,6 @@
 #include "Decoder.hh"
 #include "Zigzag.hh"
 #include "Exception.hh"
-// #include "DataFile.hh"
 #include "ErrorState.hh"
 
 #include <boost/array.hpp>
@@ -87,7 +86,6 @@ bool BinaryDecoder::decodeBool()
         return true;
     }
     avro_error_state.recordError("Invalid value for bool");
-    // throw Exception("Invalid value for bool");
     return false;
 }
 
@@ -97,7 +95,6 @@ int32_t BinaryDecoder::decodeInt()
     if (val < INT32_MIN || val > INT32_MAX) {
         avro_error_state.recordError(str(
             boost::format("Value out of range for Avro int: %1%") % val));
-        // throw Exception(boost::format("Value out of range for Avro int: %1%") % val);
         return (int32_t) 0;
     }
     return static_cast<int32_t>(val);
@@ -136,7 +133,6 @@ size_t BinaryDecoder::doDecodeLength()
     if (len < 0) {
         avro_error_state.recordError(str(
             boost::format("Cannot have negative length: %1%") % len));
-        // throw Exception(boost::format("Cannot have negative length: %1%") % len);
         return (size_t) 0;
     }
     return len;
@@ -167,10 +163,6 @@ void BinaryDecoder::decodeBytes(std::vector<uint8_t>& value)
     value.resize(len);
     if (len > 0) {
         in_.readBytes(&value[0], len);
-        if (avro::avro_error_state.has_errored) {
-            // just return
-            return;
-        }
     }
 }
 
@@ -185,10 +177,6 @@ void BinaryDecoder::decodeFixed(size_t n, std::vector<uint8_t>& value)
     value.resize(n);
     if (n > 0) {
         in_.readBytes(&value[0], n);
-        if (avro::avro_error_state.has_errored) {
-            // just return
-            return;
-        }
     }
 }
 
@@ -262,7 +250,6 @@ int64_t BinaryDecoder::doDecodeLong() {
     do {
         if (shift >= 64) {
             avro_error_state.recordError("Invalid Avro varint");
-            // throw Exception("Invalid Avro varint");
             return (int64_t) 0;
         }
         u = in_.read();

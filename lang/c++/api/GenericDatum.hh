@@ -28,7 +28,6 @@
 
 #include "Node.hh"
 #include "ValidSchema.hh"
-// #include "DataFile.hh"
 #include "ErrorState.hh"
 
 namespace avro {
@@ -150,7 +149,7 @@ public:
         type_(schema->type()) {
         init(schema);
         if (avro_error_state.has_errored) {
-            // just return?
+            // just return
             return;
         }
         *boost::any_cast<T>(&value_) = v;
@@ -177,9 +176,6 @@ protected:
      */
     GenericContainer(Type type, const NodePtr& s) : schema_(s) {
         assertType(s, type);
-        if (avro_error_state.has_errored) {
-            // do something
-        }
     }
 
 public:
@@ -337,11 +333,7 @@ public:
      * Constructs a generic array corresponding to the given schema \p schema,
      * which should be of Avro type array.
      */
-    GenericArray(const NodePtr& schema) : GenericContainer(AVRO_ARRAY, schema) {
-        if (avro_error_state.has_errored) {
-            // do something
-        }
-    }
+    GenericArray(const NodePtr& schema) : GenericContainer(AVRO_ARRAY, schema) {}
 
     /**
      * Returns the contents of this array.
@@ -374,11 +366,7 @@ public:
      * Constructs a generic map corresponding to the given schema \p schema,
      * which should be of Avro type map.
      */
-    GenericMap(const NodePtr& schema) : GenericContainer(AVRO_MAP, schema) {
-        if (avro_error_state.has_errored) {
-            // do something
-        }
-    }
+    GenericMap(const NodePtr& schema) : GenericContainer(AVRO_MAP, schema) {}
 
     /**
      * Returns the contents of this map.
@@ -418,18 +406,10 @@ public:
      * which should be of Avro type enum.
      */
     GenericEnum(const NodePtr& schema) :
-        GenericContainer(AVRO_ENUM, schema), value_(0) {
-            if (avro_error_state.has_errored) {
-                // do something
-            }
-    }
+        GenericContainer(AVRO_ENUM, schema), value_(0) {}
 
     GenericEnum(const NodePtr& schema, const std::string& symbol) :
-        GenericContainer(AVRO_ENUM, schema), value_(index(schema, symbol)) {
-            if (avro_error_state.has_errored) {
-                // do something
-            }
-    }
+        GenericContainer(AVRO_ENUM, schema), value_(index(schema, symbol)) {}
 
     /**
      * Returns the symbol corresponding to the cardinal \p n. If the
@@ -504,11 +484,7 @@ public:
     }
 
     GenericFixed(const NodePtr& schema, const std::vector<uint8_t>& v) :
-        GenericContainer(AVRO_FIXED, schema), value_(v) {
-            if (avro_error_state.has_errored) {
-                // do something
-            }
-        }
+        GenericContainer(AVRO_FIXED, schema), value_(v) {}
 
     /**
      * Returns the contents of this fixed.

@@ -79,7 +79,7 @@ JsonParser::Token JsonParser::doAdvance()
 {
     char ch = next();
     if (avro::avro_error_state.has_errored) {
-        // just return[ a dummy object]
+        // return a dummy value
         return tkArrayEnd;
     }
     if (ch == ']') {

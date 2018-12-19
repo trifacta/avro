@@ -324,7 +324,6 @@ struct StreamReader {
     void more() {
         if (! fill()) {
             avro::avro_error_state.recordError("EOF reached");
-            // throw Exception("EOF reached");
         }
     }
 
@@ -438,7 +437,6 @@ struct StreamWriter {
             }
         }
         avro::avro_error_state.recordError("EOF reached");
-        // throw Exception("EOF reached");
     }
 
 };

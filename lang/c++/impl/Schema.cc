@@ -18,7 +18,6 @@
 
 
 #include "Schema.hh"
-// #include "DataFile.hh"
 #include "ErrorState.hh"
 
 namespace avro {
@@ -107,7 +106,6 @@ UnionSchema::addType(const Schema &typeSchema)
 {
     if(typeSchema.type() == AVRO_UNION) {
         return avro_error_state.recordError("Cannot add unions to unions");
-        // throw Exception("Cannot add unions to unions");
     }
 
     if(typeSchema.type() == AVRO_RECORD) {
@@ -118,7 +116,6 @@ UnionSchema::addType(const Schema &typeSchema)
             // TODO, more checks?
             if(leaf->type() == AVRO_RECORD && leaf->name() == typeSchema.root()->name()) {
                 return avro_error_state.recordError("Records in unions cannot have duplicate names");
-                // throw Exception("Records in unions cannot have duplicate names");
             }
         }
     }

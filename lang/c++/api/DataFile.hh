@@ -306,17 +306,11 @@ public:
      */
     DataFileReader(const char* filename, const ValidSchema& readerSchema) :
         base_(new DataFileReaderBase(filename)) {
-        if (avro_error_state.has_errored) {
-            // do something
-        }
         base_->init(readerSchema);
     }
 
     DataFileReader(std::auto_ptr<InputStream> inputStream, const ValidSchema& readerSchema) :
         base_(new DataFileReaderBase(inputStream)) {
-        if (avro_error_state.has_errored) {
-            // do something
-        }
         base_->init(readerSchema);
     }
 
