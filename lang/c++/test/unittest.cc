@@ -106,6 +106,9 @@ struct TestSchema
         onion.addType(NullSchema());
         onion.addType(map);
         onion.addType(FloatSchema());
+        if (avro::avro_error_state.has_errored) {
+            return avro::avro_error_state.throwError(std::cout);
+        }
 
         record.addField("myunion", onion);
 
@@ -413,6 +416,9 @@ struct TestSchema
         schema_.toJson(std::cout);
         schema_.toFlatList(std::cout);
         buildSchema();
+        if (avro::avro_error_state.has_errored) {
+            return avro::avro_error_state.throwError(std::cout);
+        }
         std::cout << "After\n";
         schema_.toJson(std::cout);
         schema_.toFlatList(std::cout);
@@ -488,6 +494,9 @@ struct TestNested
         UnionSchema next;
         next.addType(NullSchema());
         next.addType(SymbolicSchema(Name("LongList"), list.root()));
+        if (avro::avro_error_state.has_errored) {
+            return avro::avro_error_state.throwError(std::cout);
+        }
         list.addField("next", next);
         list.addField("end", BoolSchema());
         rec.addField("list", list);
@@ -786,6 +795,9 @@ struct TestNested
 
     void test() {
         createSchema();
+        if (avro::avro_error_state.has_errored) {
+            return avro::avro_error_state.throwError(std::cout);
+        }
         testToScreen();
 
         testParseNoRecurse();

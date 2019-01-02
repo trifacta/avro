@@ -19,6 +19,8 @@
 #include "Compiler.hh"
 #include "ValidSchema.hh"
 
+#include "ErrorState.hh"
+
 #include <boost/test/included/unit_test_framework.hpp>
 #include <boost/test/unit_test.hpp>
 #include <boost/test/parameterized_test.hpp>
@@ -235,7 +237,9 @@ static void testBasic(const char* schema)
 static void testBasic_fail(const char* schema)
 {
     BOOST_TEST_CHECKPOINT(schema);
-    BOOST_CHECK_THROW(compileJsonSchemaFromString(schema), Exception);
+    compileJsonSchemaFromString(schema);
+    BOOST_CHECK(avro::avro_error_state.has_errored);
+    // BOOST_CHECK_THROW(compileJsonSchemaFromString(schema), Exception);
 }
 
 static void testCompile(const char* schema)

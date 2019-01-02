@@ -547,6 +547,10 @@ static NodePtr makeNode(const Entity& e, const Object& m,
             } else {  // No doc
                 NodePtr r =
                     makeRecordNode(e, nm, NULL, m, st, nm.ns());
+                if (avro::avro_error_state.has_errored) {
+                    // return a dummy
+                    return NodePtr();
+                }
                 (boost::dynamic_pointer_cast<NodeRecord>(r))
                     ->swap(*boost::dynamic_pointer_cast<NodeRecord>(result));
             }

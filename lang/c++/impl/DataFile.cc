@@ -42,7 +42,7 @@ using std::string;
 
 using boost::array;
 
-thread_local error_state avro_error_state;
+error_state avro_error_state;
 
 namespace {
 const string AVRO_SCHEMA_KEY("avro.schema");

@@ -19,6 +19,7 @@
 #include "boost/filesystem.hpp"
 #include "Stream.hh"
 #include "Exception.hh"
+#include "ErrorState.hh"
 #include <boost/test/included/unit_test_framework.hpp>
 #include <boost/test/parameterized_test.hpp>
 
@@ -37,7 +38,10 @@ struct CheckEmpty2 {
     void operator()(InputStream& is) {
         StreamReader r;
         r.reset(is);
-        BOOST_CHECK_THROW(r.read(), Exception);
+
+        r.read();
+        BOOST_CHECK(avro::avro_error_state.has_errored);
+        // BOOST_CHECK_THROW(r.read(), Exception);
     }
 };
 
@@ -82,7 +86,10 @@ struct Verify1 {
         for (size_t i = 0; i < dataSize; ++i) {
             BOOST_CHECK_EQUAL(i % 10 + '0', r.read());
         }
-        BOOST_CHECK_THROW(r.read(), Exception);
+
+        r.read();
+        BOOST_CHECK(avro::avro_error_state.has_errored);
+        // BOOST_CHECK_THROW(r.read(), Exception);
     }
 };
 

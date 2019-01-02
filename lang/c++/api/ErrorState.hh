@@ -33,15 +33,18 @@ struct error_state {
         error_state_messages.push(msg);
     }
     void throwError() {
+        throwError(std::cerr);
+    }
+    void throwError(std::ostream& output) {
         while (!error_state_messages.empty()) {
-            std::cerr << error_state_messages.front();
+            output << error_state_messages.front();
             error_state_messages.pop();
         }
         has_errored = false;
     }
 } ;
 
-extern thread_local error_state avro_error_state;
+extern error_state avro_error_state;
 
 } // namespace avro
 

@@ -452,6 +452,7 @@ static void check(Decoder& d, unsigned int skipLevel,
             {
                 size_t b1 = d.decodeEnum();
                 size_t b2 = sc.extractInt();
+                BOOST_CHECK(!avro::avro_error_state.has_errored);
                 BOOST_CHECK_EQUAL(b1, b2);
             }
             break;

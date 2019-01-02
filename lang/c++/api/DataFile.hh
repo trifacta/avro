@@ -369,6 +369,10 @@ public:
         if (file_has_more) {
             base_->decr();
             avro::decode(base_->decoder(), datum);
+            if (avro::avro_error_state.has_errored) {
+                // return a dummy
+                return false;
+            }
             return true;
         }
         return false;
