@@ -44,6 +44,10 @@ char JsonParser::next()
             line_++;
         }
         ch = in_.read();
+        if (avro::avro_error_state.has_errored) {
+            // just return
+            return (char) 0;
+        }
     }
     hasNext = false;
     return ch;
@@ -163,6 +167,10 @@ JsonParser::Token JsonParser::tryNumber(char ch)
         case 0:
             if (in_.hasMore()) {
                 ch = in_.read();
+                if (avro::avro_error_state.has_errored) {
+                    // return a dummy value
+                    return tkArrayEnd;
+                }
                 if (isdigit(ch)) {
                     state = (ch == '0') ? 1 : 2;
                     sv.push_back(ch);
@@ -174,6 +182,10 @@ JsonParser::Token JsonParser::tryNumber(char ch)
         case 1:
             if (in_.hasMore()) {
                 ch = in_.read();
+                if (avro::avro_error_state.has_errored) {
+                    // return a dummy value
+                    return tkArrayEnd;
+                }
                 if (ch == '.') {
                     state = 3;
                     sv.push_back(ch);
@@ -189,6 +201,10 @@ JsonParser::Token JsonParser::tryNumber(char ch)
         case 2:
             if (in_.hasMore()) {
                 ch = in_.read();
+                if (avro::avro_error_state.has_errored) {
+                    // return a dummy value
+                    return tkArrayEnd;
+                }
                 if (isdigit(ch)) {
                     sv.push_back(ch);
                     continue;
@@ -208,6 +224,10 @@ JsonParser::Token JsonParser::tryNumber(char ch)
         case 6:
             if (in_.hasMore()) {
                 ch = in_.read();
+                if (avro::avro_error_state.has_errored) {
+                    // return a dummy value
+                    return tkArrayEnd;
+                }
                 if (isdigit(ch)) {
                     sv.push_back(ch);
                     state++;
@@ -219,6 +239,10 @@ JsonParser::Token JsonParser::tryNumber(char ch)
         case 4:
             if (in_.hasMore()) {
                 ch = in_.read();
+                if (avro::avro_error_state.has_errored) {
+                    // return a dummy value
+                    return tkArrayEnd;
+                }
                 if (isdigit(ch)) {
                     sv.push_back(ch);
                     continue;
@@ -233,6 +257,10 @@ JsonParser::Token JsonParser::tryNumber(char ch)
         case 5:
             if (in_.hasMore()) {
                 ch = in_.read();
+                if (avro::avro_error_state.has_errored) {
+                    // return a dummy value
+                    return tkArrayEnd;
+                }
                 if (ch == '+' || ch == '-') {
                     sv.push_back(ch);
                     state = 6;
@@ -248,6 +276,10 @@ JsonParser::Token JsonParser::tryNumber(char ch)
         case 7:
             if (in_.hasMore()) {
                 ch = in_.read();
+                if (avro::avro_error_state.has_errored) {
+                    // return a dummy value
+                    return tkArrayEnd;
+                }
                 if (isdigit(ch)) {
                     sv.push_back(ch);
                     continue;
@@ -283,10 +315,18 @@ JsonParser::Token JsonParser::tryString()
     sv.clear();
     for ( ; ;) {
         char ch = in_.read();
+        if (avro::avro_error_state.has_errored) {
+            // return a dummy value
+            return tkArrayEnd;
+        }
         if (ch == '"') {
             return tkString;
         } else if (ch == '\\') {
             ch = in_.read();
+            if (avro::avro_error_state.has_errored) {
+                // return a dummy value
+                return tkArrayEnd;
+            }
             switch (ch) {
             case '"':
             case '\\':
@@ -357,6 +397,10 @@ JsonParser::Token JsonParser::tryLiteral(const char exp[], size_t n, Token tk)
     }
     if (in_.hasMore()) {
         nextChar = in_.read();
+        if (avro::avro_error_state.has_errored) {
+            // return a dummy value
+            return tkArrayEnd;
+        }
         if (isdigit(nextChar) || isalpha(nextChar)) {
             throw unexpected(nextChar);
         }

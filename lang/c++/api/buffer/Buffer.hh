@@ -19,7 +19,7 @@
 #ifndef avro_Buffer_hh__
 #define avro_Buffer_hh__
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__pnacl__)
 #include <sys/uio.h>
 #endif
 #include <boost/type_traits.hpp>
@@ -490,7 +490,7 @@ inline InputBuffer OutputBuffer::extractData(size_type bytes)
     return InputBuffer(newImpl);
 }
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__pnacl__)
 /** 
  * Create an array of iovec structures from the buffer.  This utility is used
  * to support writev and readv function calls.  The caller should ensure the
@@ -520,7 +520,7 @@ inline void toIovec(BufferType &buf, std::vector<struct iovec> &iov)
         ++iter;
     }
 }
-#endif
+#endif  // !_WIN32 && !__pnacl__
 
 } // namespace
 

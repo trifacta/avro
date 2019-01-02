@@ -171,9 +171,11 @@ void writeEntity(JsonGenerator<JsonNullFormatter>& g, const Entity& n)
 void Entity::ensureType(EntityType type) const
 {
     if (type_ != type) {
-        format msg = format("Invalid type. Expected \"%1%\" actual %2%") %
-            typeToString(type) % typeToString(type_);
-        throw Exception(msg);
+        // format msg = format("Invalid type. Expected \"%1%\" actual %2%") %
+            // typeToString(type) % typeToString(type_);
+        // throw Exception(msg);
+        avro::avro_error_state.recordError(str(format("Invalid type. Expected \"%1%\" actual %2%") %
+            typeToString(type) % typeToString(type_)));
     }
 }
     

@@ -393,6 +393,9 @@ static NodePtr makeRecordNode(const Entity& e, const Name& name,
                               const string* doc, const Object& m,
                               SymbolTable& st, const string& ns) {
     const Array& v = getArrayField(e, m, "fields");
+    if (avro::avro_error_state.has_errored) {
+        return NodePtr();
+    }
     concepts::MultiAttribute<string> fieldNames;
     concepts::MultiAttribute<NodePtr> fieldValues;
     vector<GenericDatum> defaultValues;

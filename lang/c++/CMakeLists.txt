@@ -20,8 +20,8 @@ cmake_minimum_required (VERSION 2.6)
 
 set (CMAKE_LEGACY_CYGWIN_WIN32 0)
 
-option(AVRO_UNIT_TEST "build unit test" ON)
-option(AVRO_BUILD_EXECUTABLES "build avrogencpp and precompile executables" ON)
+option(AVRO_UNIT_TEST "build unit test" OFF)
+option(AVRO_BUILD_EXECUTABLES "build avrogencpp and precompile executables" OFF)
 
 cmake_policy (SET CMP0042 NEW)
 

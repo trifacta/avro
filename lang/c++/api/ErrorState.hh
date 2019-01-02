@@ -37,7 +37,7 @@ struct error_state {
     }
     void throwError(std::ostream& output) {
         while (!error_state_messages.empty()) {
-            output << error_state_messages.front();
+            output << error_state_messages.front() << "\n";
             error_state_messages.pop();
         }
         has_errored = false;

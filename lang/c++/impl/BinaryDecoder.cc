@@ -253,6 +253,10 @@ int64_t BinaryDecoder::doDecodeLong() {
             return (int64_t) 0;
         }
         u = in_.read();
+        if (avro::avro_error_state.has_errored) {
+            // return a dummy value
+            return (int64_t) 0;
+        }
         encoded |= static_cast<uint64_t>(u & 0x7f) << shift;
         shift += 7;
     } while (u & 0x80);
