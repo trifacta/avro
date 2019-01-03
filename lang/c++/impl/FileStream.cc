@@ -86,7 +86,6 @@ struct FileBufferCopyIn : public BufferCopyIn {
         fd_(open(filename, O_RDONLY | O_BINARY)) {
         if (fd_ < 0) {
             avro_error_state.recordError(str(boost::format("Cannot open file: %1%") % ::strerror(errno)));
-            // throw Exception(boost::format("Cannot open file: %1%") % ::strerror(errno));
         }
     }
 
@@ -251,7 +250,6 @@ struct FileBufferCopyOut : public BufferCopyOut {
         fd_(::open(filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0644)) {
         if (fd_ < 0) {
             avro::avro_error_state.recordError(str(boost::format("Cannot open file: %1%") % ::strerror(errno)));
-                
         }
     }
 
@@ -262,7 +260,6 @@ struct FileBufferCopyOut : public BufferCopyOut {
     void write(const uint8_t* b, size_t len) {
         if (::write(fd_, b, len) < 0) {
             avro::avro_error_state.recordError(str(boost::format("Cannot write file: %1%") % ::strerror(errno)));
-                
         }
     }
 #endif

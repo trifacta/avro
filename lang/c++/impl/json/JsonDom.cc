@@ -75,7 +75,6 @@ Entity readEntity(JsonParser& p)
             while (p.peek() != JsonParser::tkArrayEnd) {
                 Entity to_push = readEntity(p);
                 if (avro::avro_error_state.has_errored) {
-                    // return a dummy value
                     return Entity();
                 }
                 v->push_back(to_push);
@@ -93,7 +92,6 @@ Entity readEntity(JsonParser& p)
                 std::string k = p.stringValue();
                 Entity n = readEntity(p);
                 if (avro::avro_error_state.has_errored) {
-                    // return a dummy value
                     return Entity();
                 }
                 v->insert(std::make_pair(k, n));
@@ -171,9 +169,6 @@ void writeEntity(JsonGenerator<JsonNullFormatter>& g, const Entity& n)
 void Entity::ensureType(EntityType type) const
 {
     if (type_ != type) {
-        // format msg = format("Invalid type. Expected \"%1%\" actual %2%") %
-            // typeToString(type) % typeToString(type_);
-        // throw Exception(msg);
         avro::avro_error_state.recordError(str(format("Invalid type. Expected \"%1%\" actual %2%") %
             typeToString(type) % typeToString(type_)));
     }

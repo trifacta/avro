@@ -93,14 +93,13 @@ void GenericDatum::init(const NodePtr& schema)
 GenericRecord::GenericRecord(const NodePtr& schema) :
     GenericContainer(AVRO_RECORD, schema) {
     if (avro_error_state.has_errored) {
-        // just return
+        
         return;
     }
     fields_.resize(schema->leaves());
     for (size_t i = 0; i < schema->leaves(); ++i) {
         fields_[i] = GenericDatum(schema->leafAt(i));
         if (avro_error_state.has_errored) {
-            // just return
             return;
         }
     }

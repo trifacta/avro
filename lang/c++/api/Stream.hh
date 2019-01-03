@@ -24,10 +24,11 @@
 #include <stdint.h>
 
 #include "boost/utility.hpp"
+// #include "boost/format.hpp"
 
 #include "Config.hh"
-#include "Exception.hh"
 #include "ErrorState.hh"
+#include "Exception.hh"
 
 namespace avro {
 
@@ -255,7 +256,6 @@ struct StreamReader {
         if (next_ == end_) {
             more();
             if (avro::avro_error_state.has_errored) {
-                // return a dummy
                 return (uint8_t) 0;
             }
         }
@@ -271,7 +271,6 @@ struct StreamReader {
             if (next_ == end_) {
                 more();
                 if (avro::avro_error_state.has_errored) {
-                    // just return
                     return;
                 }
             }
@@ -383,7 +382,7 @@ struct StreamWriter {
         if (next_ == end_) {
             more();
             if (avro::avro_error_state.has_errored) {
-                // just return
+                
                 return;
             }
         }
@@ -398,7 +397,7 @@ struct StreamWriter {
             if (next_ == end_) {
                 more();
                 if (avro::avro_error_state.has_errored) {
-                    // just return
+                    
                     return;
                 }
             }

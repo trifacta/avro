@@ -101,7 +101,6 @@ void GenericReader::read(GenericDatum& datum, Decoder& d, bool isResolving)
                 for (size_t i = 0; i < c; ++i) {
                     read(r.fieldAt(fo[i]), d, isResolving);
                     if (avro::avro_error_state.has_errored) {
-                        // just return
                         return;
                     }
                 }
@@ -109,7 +108,6 @@ void GenericReader::read(GenericDatum& datum, Decoder& d, bool isResolving)
                 for (size_t i = 0; i < c; ++i) {
                     read(r.fieldAt(i), d, isResolving);
                     if (avro::avro_error_state.has_errored) {
-                        // just return
                         return;
                     }
                 }
@@ -119,7 +117,6 @@ void GenericReader::read(GenericDatum& datum, Decoder& d, bool isResolving)
     case AVRO_ENUM:
         static size_t avro_enumeration = d.decodeEnum();
         if (avro::avro_error_state.has_errored) {
-            // just return
             return;
         }
         datum.value<GenericEnum>().set(avro_enumeration);
@@ -137,7 +134,6 @@ void GenericReader::read(GenericDatum& datum, Decoder& d, bool isResolving)
                     r[start] = GenericDatum(nn);
                     read(r[start], d, isResolving);
                     if (avro::avro_error_state.has_errored) {
-                        // just return
                         return;
                     }
                 }
@@ -158,7 +154,6 @@ void GenericReader::read(GenericDatum& datum, Decoder& d, bool isResolving)
                     r[start].second = GenericDatum(nn);
                     read(r[start].second, d, isResolving);
                     if (avro::avro_error_state.has_errored) {
-                        // just return
                         return;
                     }
                 }
@@ -232,7 +227,6 @@ void GenericWriter::write(const GenericDatum& datum, Encoder& e)
             for (size_t i = 0; i < c; ++i) {
                 write(r.fieldAt(i), e);
                 if (avro::avro_error_state.has_errored) {
-                    // just return
                     return;
                 }
             }
@@ -252,7 +246,6 @@ void GenericWriter::write(const GenericDatum& datum, Encoder& e)
                     e.startItem();
                     write(*it, e);
                     if (avro::avro_error_state.has_errored) {
-                        // just return
                         return;
                     }
                 }
@@ -272,7 +265,6 @@ void GenericWriter::write(const GenericDatum& datum, Encoder& e)
                     e.encodeString(it->first);
                     write(it->second, e);
                     if (avro::avro_error_state.has_errored) {
-                        // just return
                         return;
                     }
                 }

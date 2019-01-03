@@ -403,7 +403,6 @@ static NodePtr makeRecordNode(const Entity& e, const Name& name,
     for (Array::const_iterator it = v.begin(); it != v.end(); ++it) {
         Field f = makeField(*it, st, ns);
         if (avro::avro_error_state.has_errored) {
-            // return a dummy
             return NodePtr();
         }
         fieldNames.add(f.name);
@@ -542,7 +541,6 @@ static NodePtr makeNode(const Entity& e, const Object& m,
 
                 NodePtr r = makeRecordNode(e, nm, &doc, m, st, nm.ns());
                 if (avro::avro_error_state.has_errored) {
-                    // return a dummy
                     return NodePtr();
                 }
                 (boost::dynamic_pointer_cast<NodeRecord>(r))->swap(
@@ -551,7 +549,6 @@ static NodePtr makeNode(const Entity& e, const Object& m,
                 NodePtr r =
                     makeRecordNode(e, nm, NULL, m, st, nm.ns());
                 if (avro::avro_error_state.has_errored) {
-                    // return a dummy
                     return NodePtr();
                 }
                 (boost::dynamic_pointer_cast<NodeRecord>(r))

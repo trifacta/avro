@@ -237,12 +237,9 @@ static void testBasic(const char* schema)
 static void testBasic_fail(const char* schema)
 {
     BOOST_TEST_CHECKPOINT(schema);
-    std::cout << schema << "\n";
     compileJsonSchemaFromString(schema);
-    // compileJsonSchemaFromString("");
     BOOST_CHECK(avro::avro_error_state.has_errored);
     avro::avro_error_state.throwError();
-    // BOOST_CHECK_THROW(compileJsonSchemaFromString(schema), Exception);
 }
 
 static void testCompile(const char* schema)
@@ -258,8 +255,6 @@ static void testRoundTrip(const char* schema)
     BOOST_TEST_CHECKPOINT(schema);
     avro::ValidSchema compiledSchema =
         compileJsonSchemaFromString(std::string(schema));
-    // avro::avro_error_state.throwError();
-    // BOOST_CHECK(!avro::avro_error_state.has_errored);
     std::ostringstream os;
     compiledSchema.toJson(os);
     std::string result = os.str();

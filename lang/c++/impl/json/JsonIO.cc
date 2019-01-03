@@ -45,7 +45,6 @@ char JsonParser::next()
         }
         ch = in_.read();
         if (avro::avro_error_state.has_errored) {
-            // just return
             return (char) 0;
         }
     }
@@ -83,7 +82,6 @@ JsonParser::Token JsonParser::doAdvance()
 {
     char ch = next();
     if (avro::avro_error_state.has_errored) {
-        // return a dummy value
         return tkArrayEnd;
     }
     if (ch == ']') {
@@ -92,7 +90,7 @@ JsonParser::Token JsonParser::doAdvance()
             stateStack.pop();
             return tkArrayEnd;
         } else {
-            throw unexpected(ch);
+            return unexpected(ch);
         }
     } else if (ch == '}') {
         if (curState == stObject0 || curState == stObjectN) {
@@ -100,11 +98,11 @@ JsonParser::Token JsonParser::doAdvance()
             stateStack.pop();
             return tkObjectEnd;
         } else {
-            throw unexpected(ch);
+            return unexpected(ch);
         }
     } else if (ch == ',') {
         if (curState != stObjectN && curState != stArrayN) {
-            throw unexpected(ch);
+            return unexpected(ch);
         }
         if (curState == stObjectN) {
             curState = stObject0;
@@ -112,7 +110,7 @@ JsonParser::Token JsonParser::doAdvance()
         ch = next();
     } else if (ch == ':') {
         if (curState != stKey) {
-            throw unexpected(ch);
+            return unexpected(ch);
         }
         curState = stObjectN;
         ch = next();
@@ -120,7 +118,7 @@ JsonParser::Token JsonParser::doAdvance()
 
     if (curState == stObject0) {
         if (ch != '"') {
-            throw unexpected(ch);
+            return unexpected(ch);
         }
         curState = stKey;
     } else if (curState == stArray0) {
@@ -150,7 +148,7 @@ JsonParser::Token JsonParser::doAdvance()
         if (isdigit(ch) || ch == '-') {
             return tryNumber(ch);
         } else {
-            throw unexpected(ch);
+            return unexpected(ch);
         }
     }
 }
@@ -168,7 +166,6 @@ JsonParser::Token JsonParser::tryNumber(char ch)
             if (in_.hasMore()) {
                 ch = in_.read();
                 if (avro::avro_error_state.has_errored) {
-                    // return a dummy value
                     return tkArrayEnd;
                 }
                 if (isdigit(ch)) {
@@ -183,7 +180,6 @@ JsonParser::Token JsonParser::tryNumber(char ch)
             if (in_.hasMore()) {
                 ch = in_.read();
                 if (avro::avro_error_state.has_errored) {
-                    // return a dummy value
                     return tkArrayEnd;
                 }
                 if (ch == '.') {
@@ -202,7 +198,6 @@ JsonParser::Token JsonParser::tryNumber(char ch)
             if (in_.hasMore()) {
                 ch = in_.read();
                 if (avro::avro_error_state.has_errored) {
-                    // return a dummy value
                     return tkArrayEnd;
                 }
                 if (isdigit(ch)) {
@@ -225,7 +220,6 @@ JsonParser::Token JsonParser::tryNumber(char ch)
             if (in_.hasMore()) {
                 ch = in_.read();
                 if (avro::avro_error_state.has_errored) {
-                    // return a dummy value
                     return tkArrayEnd;
                 }
                 if (isdigit(ch)) {
@@ -240,7 +234,6 @@ JsonParser::Token JsonParser::tryNumber(char ch)
             if (in_.hasMore()) {
                 ch = in_.read();
                 if (avro::avro_error_state.has_errored) {
-                    // return a dummy value
                     return tkArrayEnd;
                 }
                 if (isdigit(ch)) {
@@ -258,7 +251,6 @@ JsonParser::Token JsonParser::tryNumber(char ch)
             if (in_.hasMore()) {
                 ch = in_.read();
                 if (avro::avro_error_state.has_errored) {
-                    // return a dummy value
                     return tkArrayEnd;
                 }
                 if (ch == '+' || ch == '-') {
@@ -277,7 +269,6 @@ JsonParser::Token JsonParser::tryNumber(char ch)
             if (in_.hasMore()) {
                 ch = in_.read();
                 if (avro::avro_error_state.has_errored) {
-                    // return a dummy value
                     return tkArrayEnd;
                 }
                 if (isdigit(ch)) {
@@ -302,7 +293,7 @@ JsonParser::Token JsonParser::tryNumber(char ch)
             }
         } else {
             if (hasNext) {
-                throw unexpected(ch);
+                return unexpected(ch);
             } else {
                 throw Exception("Unexpected EOF");
             }
@@ -316,7 +307,6 @@ JsonParser::Token JsonParser::tryString()
     for ( ; ;) {
         char ch = in_.read();
         if (avro::avro_error_state.has_errored) {
-            // return a dummy value
             return tkArrayEnd;
         }
         if (ch == '"') {
@@ -324,7 +314,6 @@ JsonParser::Token JsonParser::tryString()
         } else if (ch == '\\') {
             ch = in_.read();
             if (avro::avro_error_state.has_errored) {
-                // return a dummy value
                 return tkArrayEnd;
             }
             switch (ch) {
@@ -364,14 +353,14 @@ JsonParser::Token JsonParser::tryString()
                         } else if (c >= 'A' && c <= 'F') {
                             n += c - 'A' + 10;
                         } else {
-                            throw unexpected(c);
+                            return unexpected(c);
                         }
                     }
                     sv.push_back(n);
                 }
                 break;
             default:
-                throw unexpected(ch);
+                return unexpected(ch);
             }
         } else {
             sv.push_back(ch);
@@ -379,11 +368,12 @@ JsonParser::Token JsonParser::tryString()
     }
 }
 
-Exception JsonParser::unexpected(unsigned char c)
+JsonParser::Token JsonParser::unexpected(unsigned char c)
 {
-    std::ostringstream oss;
+    std::ostringstream oss; 
     oss << "Unexpected character in json " << toHex(c / 16) << toHex(c % 16);
-    return Exception(oss.str());
+    avro::avro_error_state.recordError(oss.str());
+    return tkArrayEnd;
 }
 
 JsonParser::Token JsonParser::tryLiteral(const char exp[], size_t n, Token tk)
@@ -392,17 +382,16 @@ JsonParser::Token JsonParser::tryLiteral(const char exp[], size_t n, Token tk)
     in_.readBytes(reinterpret_cast<uint8_t*>(c), n);
     for (size_t i = 0; i < n; ++i) {
         if (c[i] != exp[i]) {
-            throw unexpected(c[i]);
+            return unexpected(c[i]);
         }
     }
     if (in_.hasMore()) {
         nextChar = in_.read();
         if (avro::avro_error_state.has_errored) {
-            // return a dummy value
             return tkArrayEnd;
         }
         if (isdigit(nextChar) || isalpha(nextChar)) {
-            throw unexpected(nextChar);
+            return unexpected(nextChar);
         }
         hasNext = true;
     }

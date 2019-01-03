@@ -160,7 +160,6 @@ public:
         base_->syncIfNeeded();
         avro::encode(base_->encoder(), datum);
         if (avro::avro_error_state.has_errored) {
-            // just return
             return;
         }
         base_->incr();
@@ -363,14 +362,12 @@ public:
     bool read(T& datum) {
         bool file_has_more = base_->hasMore();
         if (avro::avro_error_state.has_errored) {
-            // return a dummy
             return false;
         }
         if (file_has_more) {
             base_->decr();
             avro::decode(base_->decoder(), datum);
             if (avro::avro_error_state.has_errored) {
-                // return a dummy
                 return false;
             }
             return true;

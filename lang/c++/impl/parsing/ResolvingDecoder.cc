@@ -389,7 +389,6 @@ ProductionPtr ResolvingGrammarGenerator::doGenerate2(
             }
         default:
             avro_error_state.recordError("Unknown node type");
-            // throw Exception("Unknown node type");
         }
     } else if (writerType == AVRO_UNION) {
         return resolveUnion(writer, reader, m, m2);
@@ -442,7 +441,6 @@ ProductionPtr ResolvingGrammarGenerator::doGenerate2(
             break;
         default:
             avro_error_state.recordError("Unknown node type");
-            // throw Exception("Unknown node type");
         }
     }
     return make_shared<Production>(1, Symbol::error(writer, reader));

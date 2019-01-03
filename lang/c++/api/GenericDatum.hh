@@ -149,7 +149,6 @@ public:
         type_(schema->type()) {
         init(schema);
         if (avro_error_state.has_errored) {
-            // just return
             return;
         }
         *boost::any_cast<T>(&value_) = v;
@@ -201,7 +200,6 @@ public:
     GenericUnion(const NodePtr& schema) :
         GenericContainer(AVRO_UNION, schema), curBranch_(schema->leaves()) {
         if (avro_error_state.has_errored) {
-            // just return
             return;
         }
         selectBranch(0);
@@ -265,7 +263,7 @@ public:
     size_t fieldIndex(const std::string& name) const { 
         size_t index = 0;
         if (!schema()->nameIndex(name, index)) {
-            avro_error_state.recordError("Invalid field name: " + name);
+            // avro_error_state.recordError("Invalid field name: " + name);
             throw Exception("Invalid field name: " + name);
         }
         return index;
@@ -396,7 +394,7 @@ class AVRO_DECL GenericEnum : public GenericContainer {
         if (schema->nameIndex(symbol, result)) {
             return result;
         }
-        avro_error_state.recordError("No such symbol");
+        // avro_error_state.recordError("No such symbol");
         throw Exception("No such symbol");
     }
 
@@ -419,7 +417,7 @@ public:
         if (n < schema()->names()) {
             return schema()->nameAt(n);
         }
-        avro_error_state.recordError("Not as many symbols");
+        // avro_error_state.recordError("Not as many symbols");
         throw Exception("Not as many symbols");
     }
 
@@ -446,7 +444,7 @@ public:
             value_ = n;
             return;
         }
-        avro_error_state.recordError("Not as many symbols");
+        // avro_error_state.recordError("Not as many symbols");
         throw Exception("Not as many symbols");
     }
 
@@ -477,7 +475,7 @@ public:
      */
     GenericFixed(const NodePtr& schema) : GenericContainer(AVRO_FIXED, schema) {
         if (avro_error_state.has_errored) {
-            // just return
+            
             return;
         }
         value_.resize(schema->fixedSize());

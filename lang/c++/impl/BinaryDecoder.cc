@@ -20,7 +20,6 @@
 
 #include "Decoder.hh"
 #include "Zigzag.hh"
-#include "Exception.hh"
 #include "ErrorState.hh"
 
 #include <boost/array.hpp>
@@ -110,7 +109,6 @@ float BinaryDecoder::decodeFloat()
     float result;
     in_.readBytes(reinterpret_cast<uint8_t *>(&result), sizeof(float));
     if (avro::avro_error_state.has_errored) {
-        // return a dummy
         return (float) 0;
     }
     return result;
@@ -121,7 +119,6 @@ double BinaryDecoder::decodeDouble()
     double result;
     in_.readBytes(reinterpret_cast<uint8_t *>(&result), sizeof(double));
     if (avro::avro_error_state.has_errored) {
-        // return a dummy
         return (double) 0;
     }
     return result;
@@ -145,7 +142,7 @@ void BinaryDecoder::decodeString(std::string& value)
     if (len > 0) {
         in_.readBytes(reinterpret_cast<uint8_t*>(&value[0]), len);
         if (avro::avro_error_state.has_errored) {
-            // just return
+            
             return;
         }
     }
@@ -254,7 +251,6 @@ int64_t BinaryDecoder::doDecodeLong() {
         }
         u = in_.read();
         if (avro::avro_error_state.has_errored) {
-            // return a dummy value
             return (int64_t) 0;
         }
         encoded |= static_cast<uint64_t>(u & 0x7f) << shift;

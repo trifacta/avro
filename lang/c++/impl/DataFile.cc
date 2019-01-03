@@ -78,7 +78,6 @@ DataFileWriterBase::DataFileWriterBase(const char* filename, const ValidSchema& 
     objectCount_(0)
 {
     if (avro::avro_error_state.has_errored) {
-        // just return
         return;
     }
     init(schema, syncInterval, codec);
@@ -97,7 +96,6 @@ DataFileWriterBase::DataFileWriterBase(std::auto_ptr<OutputStream> outputStream,
     objectCount_(0)
 {
     if (avro::avro_error_state.has_errored) {
-        // just return
         return;
     }
     init(schema, syncInterval, codec);
@@ -126,7 +124,6 @@ void DataFileWriterBase::init(const ValidSchema &schema, size_t syncInterval, co
 
     writeHeader();
     if (avro::avro_error_state.has_errored) {
-        // just return
         return;
     }
     encoderPtr_->init(*buffer_);
@@ -153,14 +150,12 @@ void DataFileWriterBase::sync()
     encoderPtr_->init(*stream_);
     avro::encode(*encoderPtr_, objectCount_);
     if (avro::avro_error_state.has_errored) {
-        // just return
         return;
     }
     if (codec_ == NULL_CODEC) {
         int64_t byteCount = buffer_->byteCount();
         avro::encode(*encoderPtr_, byteCount);
         if (avro::avro_error_state.has_errored) {
-            // just return
             return;
         }
         encoderPtr_->flush();
@@ -185,7 +180,6 @@ void DataFileWriterBase::sync()
         int64_t byteCount = buf.size();
         avro::encode(*encoderPtr_, byteCount);
         if (avro::avro_error_state.has_errored) {
-            // just return
             return;
         }
         encoderPtr_->flush();
@@ -231,7 +225,6 @@ void DataFileWriterBase::sync()
         int64_t byteCount = temp.size();
         avro::encode(*encoderPtr_, byteCount);
         if (avro::avro_error_state.has_errored) {
-            // just return
             return;
         }
         encoderPtr_->flush();
@@ -242,7 +235,6 @@ void DataFileWriterBase::sync()
     encoderPtr_->init(*stream_);
     avro::encode(*encoderPtr_, sync_);
     if (avro::avro_error_state.has_errored) {
-        // just return
         return;
     }
     encoderPtr_->flush();
@@ -279,23 +271,21 @@ DataFileSync DataFileWriterBase::makeSync()
 
 typedef array<uint8_t, 4> Magic;
 static Magic magic = { { 'O', 'b', 'j', '\x01' } };
+static std::string magicStr = "Obj\x01";
 
 void DataFileWriterBase::writeHeader()
 {
     encoderPtr_->init(*stream_);
     avro::encode(*encoderPtr_, magic);
     if (avro::avro_error_state.has_errored) {
-        // just return
         return;
     }
     avro::encode(*encoderPtr_, metadata_);
     if (avro::avro_error_state.has_errored) {
-        // just return
         return;
     }
     avro::encode(*encoderPtr_, sync_);
     if (avro::avro_error_state.has_errored) {
-        // just return
         return;
     }
     encoderPtr_->flush();
@@ -375,7 +365,6 @@ bool DataFileReaderBase::hasMore()
     decoder_->init(*stream_);
     avro::decode(*decoder_, s);
     if (avro::avro_error_state.has_errored) {
-        // return a dummy
         return false;
     }
     if (s != sync_) {
@@ -439,15 +428,33 @@ bool DataFileReaderBase::readDataBlock()
         return false;
     }
     stream_->backup(n);
+
+    // try reading new file header in the multiple file streaming case.
+    std::string headStr(reinterpret_cast<char*>(const_cast<uint8_t*>(p)), n);
+    if (headStr.substr(0, 4) == magicStr &&
+        headStr.substr(0, 64).find(AVRO_SCHEMA_KEY, 4) != std::string::npos) {
+        // try read new header.
+        readHeader();
+
+        // if fail, exception will be thrown by readHeader,
+        if (avro::avro_error_state.has_errored) {
+            return false;
+        }
+
+        // if success, throw an End Of Single File so that caller
+        // has opportunity to retrieve 'new' schema.
+        init();
+        avro::avro_error_state.recordError("EOSF");
+        return false;
+    }
+
     avro::decode(*decoder_, objectCount_);
     if (avro::avro_error_state.has_errored) {
-        // return a dummy
         return false;
     }
     int64_t byteCount;
     avro::decode(*decoder_, byteCount);
     if (avro::avro_error_state.has_errored) {
-        // return a dummy
         return false;
     }
     decoder_->init(*stream_);
@@ -485,6 +492,11 @@ bool DataFileReaderBase::readDataBlock()
             compressed_.insert(compressed_.end(), data, data + len);
         }
         len = compressed_.size();
+        if (len < 4) {
+            // Sadly, there seems to be no more data to read
+            avro_error_state.recordError("EOF");
+            return false;
+        }
         int b1 = compressed_[len - 4] & 0xFF;
         int b2 = compressed_[len - 3] & 0xFF;
         int b3 = compressed_[len - 2] & 0xFF;
@@ -499,7 +511,7 @@ bool DataFileReaderBase::readDataBlock()
         crc.process_bytes(uncompressed.c_str(), uncompressed.size());
         uint32_t c = crc();
         if (checksum != c) {
-            avro_error_state.recordError("CodecError: " + str(boost::format("Checksum did not match for Snappy compression: Expected: %1%, computed: %2%") % checksum % c));
+            avro_error_state.recordError(str(boost::format("CodecError: Checksum did not match for Snappy compression: Expected: %1%, computed: %2%") % checksum % c));
             return false;
         }
         os_.reset(new boost::iostreams::filtering_istream());
@@ -536,7 +548,6 @@ static ValidSchema makeSchema(const vector<uint8_t>& v)
     ValidSchema vs;
     compileJsonSchema(iss, vs);
     if (avro::avro_error_state.has_errored) {
-        // retun a dummy
         return ValidSchema();
     }
     return ValidSchema(vs);
@@ -548,7 +559,6 @@ void DataFileReaderBase::readHeader()
     Magic m;
     avro::decode(*decoder_, m);
     if (avro::avro_error_state.has_errored) {
-        // just return
         return;
     }
     if (magic != m) {
@@ -557,7 +567,6 @@ void DataFileReaderBase::readHeader()
     }
     avro::decode(*decoder_, metadata_);
     if (avro::avro_error_state.has_errored) {
-        // just return
         return;
     }
     Metadata::const_iterator it = metadata_.find(AVRO_SCHEMA_KEY);
@@ -567,7 +576,6 @@ void DataFileReaderBase::readHeader()
 
     dataSchema_ = makeSchema(it->second);
     if (avro::avro_error_state.has_errored) {
-        // just return
         return;
     }
     if (! readerSchema_.root()) {
@@ -591,7 +599,6 @@ void DataFileReaderBase::readHeader()
 
     avro::decode(*decoder_, sync_);
     if (avro::avro_error_state.has_errored) {
-        // just return
         return;
     }
     decoder_->init(*stream_);

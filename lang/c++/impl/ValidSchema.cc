@@ -39,8 +39,6 @@ static bool validate(const NodePtr &node, SymbolMap &symbolMap)
     if (! node->isValid()) {
         avro_error_state.recordError(str(format("Schema is invalid, due to bad node of type %1%")
             % node->type()));
-        // throw Exception(format("Schema is invalid, due to bad node of type %1%")
-        //     % node->type());
     }
 
     if (node->hasName()) {
@@ -52,8 +50,6 @@ static bool validate(const NodePtr &node, SymbolMap &symbolMap)
             if (! found) {
                 avro_error_state.recordError(str(format("Symbolic name \"%1%\" is unknown") %
                     node->name()));
-                // throw Exception(format("Symbolic name \"%1%\" is unknown") %
-                //     node->name());
             }
 
             shared_ptr<NodeSymbolic> symNode =
@@ -188,7 +184,6 @@ string ValidSchema::compactSchema(const string& schema) {
 
     if (insideQuote) {
         avro_error_state.recordError("Schema is not well formed with mismatched quotes");
-        // throw Exception("Schema is not well formed with mismatched quotes");
     }
 
     if (newPos < schema.size()) {

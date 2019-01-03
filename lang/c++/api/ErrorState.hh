@@ -22,6 +22,8 @@
 #include <string>
 #include <queue>
 #include <iostream>
+#include <boost/iostreams/device/null.hpp>
+#include <boost/iostreams/stream.hpp>
 
 namespace avro {
 
@@ -31,6 +33,10 @@ struct error_state {
     void recordError(std::string msg) {
         has_errored = true;
         error_state_messages.push(msg);
+    }
+    void emptyState() {
+        std::ostream nullout(nullptr);
+        throwError(nullout);
     }
     void throwError() {
         throwError(std::cerr);

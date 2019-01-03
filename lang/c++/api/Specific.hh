@@ -235,7 +235,6 @@ template <typename T> struct codec_traits<std::vector<T> > {
                 e.startItem();
                 avro::encode(e, *it);
                 if (avro::avro_error_state.has_errored) {
-                    // just return
                     return;
                 }
             }
@@ -253,7 +252,6 @@ template <typename T> struct codec_traits<std::vector<T> > {
                 T t;
                 avro::decode(d, t);
                 if (avro::avro_error_state.has_errored) {
-                    // just return
                     return;
                 }
                 s.push_back(t);
@@ -291,12 +289,10 @@ template <typename T> struct codec_traits<std::map<std::string, T> > {
                 e.startItem();
                 avro::encode(e, it->first);
                 if (avro::avro_error_state.has_errored) {
-                    // just return
                     return;
                 }
                 avro::encode(e, it->second);
                 if (avro::avro_error_state.has_errored) {
-                    // just return
                     return;
                 }
             }
@@ -314,13 +310,11 @@ template <typename T> struct codec_traits<std::map<std::string, T> > {
                 std::string k;
                 avro::decode(d, k);
                 if (avro::avro_error_state.has_errored) {
-                    // just return
                     return;
                 }
                 T t;
                 avro::decode(d, t);
                 if (avro::avro_error_state.has_errored) {
-                    // just return
                     return;
                 }
                 s[k] = t;
