@@ -312,7 +312,7 @@ struct StreamReader {
                 end_ = next_ + n;
                 return true;
             }
-            return false;
+            // return false;
         }
         return false;
     }

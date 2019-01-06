@@ -40,6 +40,9 @@ struct CheckEmpty2 {
 
         r.read();
         BOOST_CHECK(avro::avro_error_state.has_errored);
+        if (avro::avro_error_state.has_errored) {
+            avro::avro_error_state.emptyState();
+        }
     }
 };
 
@@ -82,11 +85,22 @@ struct Verify1 {
         StreamReader r;
         r.reset(is);
         for (size_t i = 0; i < dataSize; ++i) {
-            BOOST_CHECK_EQUAL(i % 10 + '0', r.read());
+            uint8_t output = r.read();
+            if (avro::avro_error_state.has_errored) {
+                std::cout << avro::avro_error_state.error_state_messages.front() << "\n";
+            }
+            BOOST_CHECK(!avro::avro_error_state.has_errored);
+            if (avro::avro_error_state.has_errored) {
+                avro::avro_error_state.throwError();
+            }
+            BOOST_CHECK_EQUAL(i % 10 + '0', output);
         }
 
         r.read();
         BOOST_CHECK(avro::avro_error_state.has_errored);
+        if (avro::avro_error_state.has_errored) {
+            avro::avro_error_state.emptyState();
+        }
     }
 };
 
