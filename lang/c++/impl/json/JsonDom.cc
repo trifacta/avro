@@ -54,25 +54,46 @@ Entity readEntity(JsonParser& p)
     switch (peek_return) {
     case JsonParser::tkNull:
         p.advance();
+        if (avro::avro_error_state.has_errored) {
+            return Entity();
+        }
         return Entity(p.line());
     case JsonParser::tkBool:
         p.advance();
+        if (avro::avro_error_state.has_errored) {
+            return Entity();
+        }
         return Entity(p.boolValue(), p.line());
     case JsonParser::tkLong:
         p.advance();
+        if (avro::avro_error_state.has_errored) {
+            return Entity();
+        }
         return Entity(p.longValue(), p.line());
     case JsonParser::tkDouble:
         p.advance();
+        if (avro::avro_error_state.has_errored) {
+            return Entity();
+        }
         return Entity(p.doubleValue(), p.line());
     case JsonParser::tkString:
         p.advance();
+        if (avro::avro_error_state.has_errored) {
+            return Entity();
+        }
         return Entity(boost::make_shared<String>(p.stringValue()), p.line());
     case JsonParser::tkArrayStart:
         {
             size_t l = p.line();
             p.advance();
+            if (avro::avro_error_state.has_errored) {
+                return Entity();
+            }
             boost::shared_ptr<Array> v = boost::make_shared<Array>();
             while (p.peek() != JsonParser::tkArrayEnd) {
+                if (avro::avro_error_state.has_errored) {
+                    return Entity();
+                }
                 Entity to_push = readEntity(p);
                 if (avro::avro_error_state.has_errored) {
                     return Entity();
@@ -80,15 +101,27 @@ Entity readEntity(JsonParser& p)
                 v->push_back(to_push);
             }
             p.advance();
+            if (avro::avro_error_state.has_errored) {
+                return Entity();
+            }
             return Entity(v, l);
         }
     case JsonParser::tkObjectStart:
         {
             size_t l = p.line();
             p.advance();
+            if (avro::avro_error_state.has_errored) {
+                return Entity();
+            }
             boost::shared_ptr<Object> v = boost::make_shared<Object>();
             while (p.peek() != JsonParser::tkObjectEnd) {
+                if (avro::avro_error_state.has_errored) {
+                    return Entity();
+                }
                 p.advance();
+                if (avro::avro_error_state.has_errored) {
+                    return Entity();
+                }
                 std::string k = p.stringValue();
                 Entity n = readEntity(p);
                 if (avro::avro_error_state.has_errored) {
@@ -97,6 +130,9 @@ Entity readEntity(JsonParser& p)
                 v->insert(std::make_pair(k, n));
             }
             p.advance();
+            if (avro::avro_error_state.has_errored) {
+                return Entity();
+            }
             return Entity(v, l);
         }
     default:

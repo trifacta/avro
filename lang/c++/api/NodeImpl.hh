@@ -130,7 +130,7 @@ class NodeImpl : public Node
 
     void doAddName(const std::string &name) {
         if (! nameIndex_.add(name, leafNameAttributes_.size())) {
-            throw Exception(boost::format("Cannot add duplicate name: %1%") % name);
+            return avro::avro_error_state.recordError(str(boost::format("Cannot add duplicate name: %1%") % name));
         }
         leafNameAttributes_.add(name);
     }
@@ -313,9 +313,9 @@ public:
         defaultValues(dv) {
         for (size_t i = 0; i < leafNameAttributes_.size(); ++i) {
             if (!nameIndex_.add(leafNameAttributes_.get(i), i)) {
-                throw Exception(boost::format(
+                avro::avro_error_state.recordError(str(boost::format(
                     "Cannot add duplicate name: %1%") %
-                    leafNameAttributes_.get(i));
+                    leafNameAttributes_.get(i)));
             }
         }
     }
@@ -327,9 +327,9 @@ public:
         defaultValues(dv) {
         for (size_t i = 0; i < leafNameAttributes_.size(); ++i) {
             if (!nameIndex_.add(leafNameAttributes_.get(i), i)) {
-                throw Exception(boost::format(
+                avro::avro_error_state.recordError(str(boost::format(
                     "Cannot add duplicate name: %1%") %
-                    leafNameAttributes_.get(i));
+                    leafNameAttributes_.get(i)));
             }
         }
     }
@@ -368,7 +368,7 @@ class AVRO_DECL NodeEnum : public NodeImplEnum
     {
         for(size_t i=0; i < leafNameAttributes_.size(); ++i) {
             if(!nameIndex_.add(leafNameAttributes_.get(i), i)) {
-                 throw Exception(boost::format("Cannot add duplicate name: %1%") % leafNameAttributes_.get(i));
+                 avro::avro_error_state.recordError(str(boost::format("Cannot add duplicate name: %1%") % leafNameAttributes_.get(i)));
             }
         }
     }

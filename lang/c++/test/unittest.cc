@@ -91,14 +91,10 @@ struct TestSchema
         myenum.addSymbol("three");
 
         bool caught = false;
-        try {
-            myenum.addSymbol("three");
-        }
-        catch(Exception &e) {
-            std::cout << "(intentional) exception: " << e.what() << '\n';
-            caught = true;
-        }
-        BOOST_CHECK_EQUAL(caught, true);
+        myenum.addSymbol("three");
+        BOOST_CHECK(avro::avro_error_state.has_errored);
+        std::cout << "(intentional) exception: ";
+        avro::avro_error_state.throwError();
 
         record.addField("myenum", myenum);
 
@@ -122,15 +118,11 @@ struct TestSchema
         record.addField("myfixed", fixed);
 
         caught = false;
-        try {
-            record.addField("mylong", LongSchema());
-        }
-        catch(Exception &e) {
-            std::cout << "(intentional) exception: " << e.what() << '\n';
-            caught = true;
-        }
-        BOOST_CHECK_EQUAL(caught, true);
-
+        record.addField("mylong", LongSchema());
+        BOOST_CHECK(avro::avro_error_state.has_errored);
+        std::cout << "(intentional) exception: ";
+        avro::avro_error_state.throwError();
+        
         record.addField("mylong2", LongSchema());
 
         record.addField("anotherint", intSchema);

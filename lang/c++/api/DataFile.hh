@@ -305,12 +305,17 @@ public:
      */
     DataFileReader(const char* filename, const ValidSchema& readerSchema) :
         base_(new DataFileReaderBase(filename)) {
-        base_->init(readerSchema);
+        if (!avro::avro_error_state.has_errored) {
+            base_->init(readerSchema);
+        }
+        
     }
 
     DataFileReader(std::auto_ptr<InputStream> inputStream, const ValidSchema& readerSchema) :
         base_(new DataFileReaderBase(inputStream)) {
-        base_->init(readerSchema);
+        if (!avro::avro_error_state.has_errored) {
+            base_->init(readerSchema);
+        }
     }
 
     /**
@@ -319,12 +324,16 @@ public:
      */
     DataFileReader(const char* filename) :
         base_(new DataFileReaderBase(filename)) {
-        base_->init();
+        if (!avro::avro_error_state.has_errored) {
+            base_->init();
+        }
     }
 
     DataFileReader(std::auto_ptr<InputStream> inputStream) :
         base_(new DataFileReaderBase(inputStream)) {
-        base_->init();
+        if (!avro::avro_error_state.has_errored) {
+            base_->init();
+        }
     }
 
     /**

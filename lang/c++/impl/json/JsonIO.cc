@@ -295,7 +295,8 @@ JsonParser::Token JsonParser::tryNumber(char ch)
             if (hasNext) {
                 return unexpected(ch);
             } else {
-                throw Exception("Unexpected EOF");
+                avro::avro_error_state.recordError("Unexpected EOF");
+                return tkArrayEnd;
             }
         }
     }
@@ -380,6 +381,9 @@ JsonParser::Token JsonParser::tryLiteral(const char exp[], size_t n, Token tk)
 {
     char c[100];
     in_.readBytes(reinterpret_cast<uint8_t*>(c), n);
+    if (avro::avro_error_state.has_errored) {
+        return tkArrayEnd;
+    }
     for (size_t i = 0; i < n; ++i) {
         if (c[i] != exp[i]) {
             return unexpected(c[i]);

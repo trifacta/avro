@@ -424,6 +424,9 @@ static NodePtr makeEnumNode(const Entity& e,
     const Name& name, const Object& m)
 {
     const Array& v = getArrayField(e, m, "symbols");
+    if (avro::avro_error_state.has_errored) {
+        return NodePtr();
+    }
     concepts::MultiAttribute<string> symbols;
     for (Array::const_iterator it = v.begin(); it != v.end(); ++it) {
         if (it->type() != json::etString) {
@@ -523,6 +526,9 @@ static NodePtr makeNode(const Entity& e, const Object& m,
     SymbolTable& st, const string& ns)
 {
     const string& type = getStringField(e, m, "type");
+    if (avro::avro_error_state.has_errored) {
+        return NodePtr();
+    }
     if (NodePtr result = makePrimitive(type)) {
         return result;
     } else if (type == "record" || type == "error" ||
@@ -538,6 +544,9 @@ static NodePtr makeNode(const Entity& e, const Object& m,
             // Get field doc
             if (containsField(m, "doc")) {
                 string doc = getDocField(e, m);
+                if (avro::avro_error_state.has_errored) {
+                    return NodePtr();
+                }
 
                 NodePtr r = makeRecordNode(e, nm, &doc, m, st, nm.ns());
                 if (avro::avro_error_state.has_errored) {

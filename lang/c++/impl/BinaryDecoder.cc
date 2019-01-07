@@ -79,12 +79,15 @@ void BinaryDecoder::decodeNull()
 bool BinaryDecoder::decodeBool()
 {
     uint8_t v = in_.read();
+    // if (avro::avro_error_state.has_errored) {
+    //     return false;
+    // }
     if (v == 0) {
         return false;
     } else if (v == 1) {
         return true;
     }
-    avro_error_state.recordError("Invalid value for bool");
+    avro::avro_error_state.recordError("Invalid value for bool");
     return false;
 }
 
@@ -92,7 +95,7 @@ int32_t BinaryDecoder::decodeInt()
 {
     int64_t val = doDecodeLong();
     if (val < INT32_MIN || val > INT32_MAX) {
-        avro_error_state.recordError(str(
+        avro::avro_error_state.recordError(str(
             boost::format("Value out of range for Avro int: %1%") % val));
         return (int32_t) 0;
     }
@@ -128,7 +131,7 @@ size_t BinaryDecoder::doDecodeLength()
 {
     ssize_t len = decodeInt();
     if (len < 0) {
-        avro_error_state.recordError(str(
+        avro::avro_error_state.recordError(str(
             boost::format("Cannot have negative length: %1%") % len));
         return (size_t) 0;
     }
@@ -246,7 +249,7 @@ int64_t BinaryDecoder::doDecodeLong() {
     uint8_t u;
     do {
         if (shift >= 64) {
-            avro_error_state.recordError("Invalid Avro varint");
+            avro::avro_error_state.recordError("Invalid Avro varint");
             return (int64_t) 0;
         }
         u = in_.read();

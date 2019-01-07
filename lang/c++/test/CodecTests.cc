@@ -148,6 +148,20 @@ public:
             }
         }
         return result;
+        
+        /*int result = 0;
+        if (p >= end) {
+            avro::avro_error_state.recordError("wtf");
+            return 0;
+        } else do {
+            if (isdigit(*p)) {
+                result *= 10;
+                result += *p++ - '0';
+            } else {
+                break;
+            }
+        } while (p < end);
+        return result;*/
     }
 
     bool isDone() const { return p == end; }
@@ -451,9 +465,14 @@ static void check(Decoder& d, unsigned int skipLevel,
         case 'e':
             {
                 size_t b1 = d.decodeEnum();
+                BOOST_CHECK(!avro::avro_error_state.has_errored);
                 size_t b2 = sc.extractInt();
                 BOOST_CHECK(!avro::avro_error_state.has_errored);
+                // size_t b2 = (size_t) 0;
                 BOOST_CHECK_EQUAL(b1, b2);
+                // int i = 1;
+                // int j = 1;
+                // BOOST_CHECK_EQUAL(i,j);
             }
             break;
         case '[':

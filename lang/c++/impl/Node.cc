@@ -68,10 +68,10 @@ static bool invalidChar2(char c)
 void Name::check() const
 {
     if (! ns_.empty() && (ns_[0] == '.' || ns_[ns_.size() - 1] == '.' || std::find_if(ns_.begin(), ns_.end(), invalidChar1) != ns_.end())) {
-        throw Exception("Invalid namespace: " + ns_);
+        return avro::avro_error_state.recordError("Invalid namespace: " + ns_);
     }
     if (simpleName_.empty() || std::find_if(simpleName_.begin(), simpleName_.end(), invalidChar2) != simpleName_.end()) {
-        throw Exception("Invalid name: " + simpleName_);
+        return avro::avro_error_state.recordError("Invalid name: " + simpleName_);
     }
 }
 

@@ -28,6 +28,7 @@
 #include "Exception.hh"
 #include "Types.hh"
 #include "SchemaResolution.hh"
+#include "ErrorState.hh"
 
 namespace avro {
 
