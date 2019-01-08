@@ -128,11 +128,6 @@ struct IStreamBufferCopyIn : public BufferCopyIn {
 
     bool read(uint8_t* b, size_t toRead, size_t& actual) {
         is_.read(reinterpret_cast<char*>(b), toRead);
-        /*if (avro::avro_error_state.has_errored) {
-            // avro::avro_error_state.throwError();
-            std::cout << "what is going on\n";
-            return false;
-        }*/
         if (is_.bad()) {
             return false;
         }
